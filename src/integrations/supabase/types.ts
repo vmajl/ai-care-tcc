@@ -14,7 +14,143 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      dose_logs: {
+        Row: {
+          horario_previsto: string
+          id: string
+          medication_id: string
+          owner_id: string
+          patient_id: string
+          tomado_em: string
+        }
+        Insert: {
+          horario_previsto: string
+          id?: string
+          medication_id: string
+          owner_id: string
+          patient_id: string
+          tomado_em?: string
+        }
+        Update: {
+          horario_previsto?: string
+          id?: string
+          medication_id?: string
+          owner_id?: string
+          patient_id?: string
+          tomado_em?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dose_logs_medication_id_fkey"
+            columns: ["medication_id"]
+            isOneToOne: false
+            referencedRelation: "medications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dose_logs_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medications: {
+        Row: {
+          ativo: boolean
+          continuo: boolean
+          created_at: string
+          data_fim: string | null
+          dosagem: string
+          id: string
+          instrucoes: string | null
+          intervalo_horas: number
+          nome: string
+          owner_id: string
+          patient_id: string
+          primeiro_horario: string
+        }
+        Insert: {
+          ativo?: boolean
+          continuo?: boolean
+          created_at?: string
+          data_fim?: string | null
+          dosagem?: string
+          id?: string
+          instrucoes?: string | null
+          intervalo_horas?: number
+          nome: string
+          owner_id: string
+          patient_id: string
+          primeiro_horario?: string
+        }
+        Update: {
+          ativo?: boolean
+          continuo?: boolean
+          created_at?: string
+          data_fim?: string | null
+          dosagem?: string
+          id?: string
+          instrucoes?: string | null
+          intervalo_horas?: number
+          nome?: string
+          owner_id?: string
+          patient_id?: string
+          primeiro_horario?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medications_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patients: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          observacao: string | null
+          owner_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome: string
+          observacao?: string | null
+          owner_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          observacao?: string | null
+          owner_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          nome?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
