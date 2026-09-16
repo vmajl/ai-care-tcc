@@ -6,13 +6,13 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Cápsula — lembretes de remédios para idosos" },
+      { title: "AICare — lembretes de remédios para idosos" },
       {
         name: "description",
         content:
           "Converse com a assistente, cadastre os remédios e receba lembretes dos horários. Feito para idosos e cuidadores.",
       },
-      { property: "og:title", content: "Cápsula — lembretes de remédios para idosos" },
+      { property: "og:title", content: "AICare — lembretes de remédios para idosos" },
       {
         property: "og:description",
         content:
@@ -41,7 +41,7 @@ function Index() {
           </span>
           <div>
             <p className="text-xs font-bold tracking-[0.18em] text-inksoft uppercase">Lembretes</p>
-            <h1 className="font-display text-3xl leading-none font-semibold">Cápsula</h1>
+            <h1 className="font-display text-3xl leading-none font-semibold">AICare</h1>
           </div>
         </div>
 
@@ -70,7 +70,7 @@ function Index() {
           <Recurso
             icon={<Pill className="size-6" />}
             titulo="Uso contínuo ou por tempo certo"
-            texto="A Cápsula sabe quando o tratamento termina."
+            texto="O AICare sabe quando o tratamento termina."
           />
           <Recurso
             icon={<Users className="size-6" />}
@@ -80,7 +80,7 @@ function Index() {
         </section>
 
         <p className="pb-4 text-center text-base font-medium text-inksoft">
-          A Cápsula organiza horários. Ela não substitui a orientação do seu médico.
+          O AICare organiza horários. Ele não substitui a orientação do seu médico.
         </p>
       </main>
     </div>

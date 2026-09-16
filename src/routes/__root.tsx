@@ -79,11 +79,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Cápsula — lembretes de medicamentos" },
+      { title: "AICare — lembretes de medicamentos" },
       {
         name: "description",
         content:
-          "Cápsula organiza os horários dos remédios com lembretes simples para idosos e cuidadores.",
+          "AICare organiza os horários dos remédios com lembretes simples para idosos e cuidadores.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

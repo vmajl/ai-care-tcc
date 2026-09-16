@@ -10,12 +10,12 @@ import { descricaoFrequencia, type Medication, type Patient } from "@/lib/capsul
 export const Route = createFileRoute("/_authenticated/remedios")({
   head: () => ({
     meta: [
-      { title: "Remédios cadastrados — Cápsula" },
+      { title: "Remédios cadastrados — AICare" },
       {
         name: "description",
         content: "Veja e organize todos os remédios de cada pessoa, com horários e duração.",
       },
-      { property: "og:title", content: "Remédios cadastrados — Cápsula" },
+      { property: "og:title", content: "Remédios cadastrados — AICare" },
       {
         property: "og:description",
         content: "Veja e organize todos os remédios de cada pessoa, com horários e duração.",
