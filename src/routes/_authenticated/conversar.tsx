@@ -7,7 +7,10 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { usePacienteSelecionado } from "@/hooks/usePaciente";
-import { conversarComAssistente, type Sugestao } from "@/lib/assistente.functions";
+import {
+  conversarComAssistente,
+  type Sugestao,
+} from "@/lib/assistente.functions";
 import type { Patient } from "@/lib/capsula";
 
 export const Route = createFileRoute("/_authenticated/conversar")({
@@ -16,19 +19,24 @@ export const Route = createFileRoute("/_authenticated/conversar")({
       { title: "Conversar com a assistente — AICare" },
       {
         name: "description",
-        content: "Descreva o remédio em suas palavras e a assistente monta a ficha com horários.",
+        content:
+          "Descreva o remédio em suas palavras e a assistente monta a ficha com horários.",
       },
       { property: "og:title", content: "Conversar com a assistente — AICare" },
       {
         property: "og:description",
-        content: "Descreva o remédio em suas palavras e a assistente monta a ficha com horários.",
+        content:
+          "Descreva o remédio em suas palavras e a assistente monta a ficha com horários.",
       },
     ],
   }),
   component: Conversar,
 });
 
-type Mensagem = { role: "user" | "assistant"; content: string };
+type Mensagem = {
+  role: "user" | "assistant";
+  content: string;
+};
 
 function Conversar() {
   const navigate = useNavigate();
@@ -42,11 +50,17 @@ function Conversar() {
         .from("patients")
         .select("*")
         .order("created_at", { ascending: true });
+
       if (error) throw error;
+
       return data;
     },
   });
-  const { pacienteId, selecionar } = usePacienteSelecionado(pacientes.map((p) => p.id));
+
+  const { pacienteId, selecionar } = usePacienteSelecionado(
+    pacientes.map((p) => p.id),
+  );
+
   const paciente = pacientes.find((p) => p.id === pacienteId);
 
   const [mensagens, setMensagens] = useState<Mensagem[]>([
@@ -56,25 +70,60 @@ function Conversar() {
         "Olá! Me conte o remédio: o nome, a dosagem e de quantas em quantas horas precisa tomar.",
     },
   ]);
+
   const [texto, setTexto] = useState("");
   const [pensando, setPensando] = useState(false);
   const [sugestao, setSugestao] = useState<Sugestao | null>(null);
   const [salvando, setSalvando] = useState(false);
 
+  // Estados da gravação de áudio
+  const [gravando, setGravando] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [duracao, setDuracao] = useState(0);
+
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<number | null>(null);
+
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
+
     const conteudo = texto.trim();
-    if (!conteudo || pensando) return;
-    const novas: Mensagem[] = [...mensagens, { role: "user", content: conteudo }];
+
+    if (!conteudo || pensando || gravando) return;
+
+    const novas: Mensagem[] = [
+      ...mensagens,
+      {
+        role: "user",
+        content: conteudo,
+      },
+    ];
+
     setMensagens(novas);
     setTexto("");
     setPensando(true);
+
     try {
       const resposta = await conversar({
-        data: { mensagens: novas, pacienteNome: paciente?.nome ?? "" },
+        data: {
+          mensagens: novas,
+          pacienteNome: paciente?.nome ?? "",
+        },
       });
-      setMensagens([...novas, { role: "assistant", content: resposta.resposta }]);
-      if (resposta.sugestao) setSugestao(resposta.sugestao);
+
+      setMensagens([
+        ...novas,
+        {
+          role: "assistant",
+          content: resposta.resposta,
+        },
+      ]);
+
+      if (resposta.sugestao) {
+        setSugestao(resposta.sugestao);
+      }
     } catch {
       toast.error("A assistente não respondeu. Tente novamente.");
     } finally {
@@ -84,9 +133,12 @@ function Conversar() {
 
   async function confirmar() {
     if (!sugestao || !pacienteId) return;
+
     setSalvando(true);
+
     try {
       const { data: sessao } = await supabase.auth.getUser();
+
       const { error } = await supabase.from("medications").insert({
         owner_id: sessao.user!.id,
         patient_id: pacienteId,
@@ -98,11 +150,20 @@ function Conversar() {
         data_fim: sugestao.data_fim,
         instrucoes: sugestao.instrucoes,
       });
+
       if (error) throw error;
-      queryClient.invalidateQueries({ queryKey: ["medicamentos"] });
+
+      queryClient.invalidateQueries({
+        queryKey: ["medicamentos"],
+      });
+
       toast.success(`${sugestao.nome} adicionado aos lembretes.`);
+
       setSugestao(null);
-      navigate({ to: "/hoje" });
+
+      navigate({
+        to: "/hoje",
+      });
     } catch {
       toast.error("Não conseguimos salvar o remédio.");
     } finally {
@@ -110,15 +171,127 @@ function Conversar() {
     }
   }
 
+  // Formata a duração da gravação
+  function formatarTempo(segundos: number) {
+    const minutos = Math.floor(segundos / 60)
+      .toString()
+      .padStart(2, "0");
+
+    const segundosRestantes = (segundos % 60)
+      .toString()
+      .padStart(2, "0");
+
+    return `${minutos}:${segundosRestantes}`;
+  }
+
+  // Inicia a gravação
+  async function iniciarGravacao() {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      toast.error("Seu navegador não permite gravação de áudio.");
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+
+      chunksRef.current = [];
+      streamRef.current = stream;
+
+      const recorder = new MediaRecorder(stream);
+
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+
+        streamRef.current = null;
+
+        const blob = new Blob(chunksRef.current, {
+          type: recorder.mimeType || "audio/webm",
+        });
+
+        if (audioUrl) {
+          URL.revokeObjectURL(audioUrl);
+        }
+
+        setAudioUrl(URL.createObjectURL(blob));
+      };
+
+      recorder.start();
+
+      setGravando(true);
+      setDuracao(0);
+
+      timerRef.current = window.setInterval(() => {
+        setDuracao((tempo) => tempo + 1);
+      }, 1000);
+    } catch {
+      toast.error("Permita o acesso ao microfone para gravar.");
+    }
+  }
+
+  // Para a gravação
+  function pararGravacao() {
+    mediaRecorderRef.current?.stop();
+
+    setGravando(false);
+
+    if (timerRef.current) {
+      window.clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }
+
+  // Apaga o áudio gravado
+  function cancelarAudio() {
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+    }
+
+    setAudioUrl(null);
+    setDuracao(0);
+  }
+
+  // Limpa a gravação quando a tela é fechada
+  useEffect(() => {
+    return () => {
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+
+      if (timerRef.current) {
+        window.clearInterval(timerRef.current);
+      }
+
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+    };
+  }, [audioUrl]);
+
   return (
-    <AppShell pacientes={pacientes} pacienteId={pacienteId} onTrocarPaciente={selecionar}>
+    <AppShell
+      pacientes={pacientes}
+      pacienteId={pacienteId}
+      onTrocarPaciente={selecionar}
+    >
       <section className="rounded-3xl bg-card p-5 ring-1 ring-border shadow-soft">
         <div className="mb-4 flex items-center gap-3">
           <span className="chrome grid size-11 shrink-0 place-items-center rounded-full ring-1 ring-on-chrome/60">
-            <span className="font-display text-lg font-bold text-on-chrome">IA</span>
+            <span className="font-display text-lg font-bold text-on-chrome">
+              IA
+            </span>
           </span>
+
           <p className="font-display text-lg font-semibold">
-            Assistente de doses{paciente ? ` · ${paciente.nome.split(" ")[0]}` : ""}
+            Assistente de doses
+            {paciente ? ` · ${paciente.nome.split(" ")[0]}` : ""}
           </p>
         </div>
 
@@ -129,16 +302,26 @@ function Conversar() {
                 key={i}
                 className="chrome ml-auto max-w-[88%] rounded-2xl rounded-br-md px-4 py-3 text-on-chrome shadow-sm"
               >
-                <p className="font-semibold text-pretty">{m.content}</p>
+                <p className="font-semibold text-pretty">
+                  {m.content}
+                </p>
               </div>
             ) : (
-              <div key={i} className="max-w-[88%] rounded-2xl rounded-tl-md bg-chrome-tint px-4 py-3">
-                <p className="font-semibold text-pretty">{m.content}</p>
+              <div
+                key={i}
+                className="max-w-[88%] rounded-2xl rounded-tl-md bg-chrome-tint px-4 py-3"
+              >
+                <p className="font-semibold text-pretty">
+                  {m.content}
+                </p>
               </div>
             ),
           )}
+
           {pensando ? (
-            <p className="text-base font-bold text-inksoft">A assistente está escrevendo…</p>
+            <p className="text-base font-bold text-inksoft">
+              A assistente está escrevendo…
+            </p>
           ) : null}
         </div>
 
@@ -147,9 +330,19 @@ function Conversar() {
             <p className="mb-3 text-xs font-bold tracking-[0.14em] text-mintink uppercase">
               Cartão de confirmação
             </p>
+
             <dl className="space-y-2">
-              <Linha rotulo="Medicamento" valor={sugestao.nome} destaque />
-              <Linha rotulo="Dosagem" valor={sugestao.dosagem} />
+              <Linha
+                rotulo="Medicamento"
+                valor={sugestao.nome}
+                destaque
+              />
+
+              <Linha
+                rotulo="Dosagem"
+                valor={sugestao.dosagem}
+              />
+
               <Linha
                 rotulo="Intervalo"
                 valor={
@@ -158,18 +351,26 @@ function Conversar() {
                     : `a cada ${sugestao.intervalo_horas} horas`
                 }
               />
-              <Linha rotulo="Primeira dose" valor={sugestao.primeiro_horario} />
+
+              <Linha
+                rotulo="Primeira dose"
+                valor={sugestao.primeiro_horario}
+              />
+
               <Linha
                 rotulo="Duração"
                 valor={
                   sugestao.continuo
                     ? "uso contínuo"
                     : sugestao.data_fim
-                      ? `até ${new Date(`${sugestao.data_fim}T12:00`).toLocaleDateString("pt-BR")}`
+                      ? `até ${new Date(
+                          `${sugestao.data_fim}T12:00`,
+                        ).toLocaleDateString("pt-BR")}`
                       : "tempo determinado"
                 }
               />
             </dl>
+
             <div className="mt-4 grid grid-cols-2 gap-2">
               <button
                 onClick={confirmar}
@@ -178,6 +379,7 @@ function Conversar() {
               >
                 Confirmar
               </button>
+
               <button
                 onClick={() => setSugestao(null)}
                 className="rounded-xl bg-card py-3 font-display text-lg font-bold text-inksoft ring-1 ring-border transition-transform hover:scale-[1.02] active:scale-95"
@@ -188,22 +390,94 @@ function Conversar() {
           </div>
         ) : null}
 
-        <form onSubmit={enviar} className="mt-4 flex items-end gap-2">
-          <textarea
-            value={texto}
-            onChange={(e) => setTexto(e.target.value)}
-            rows={2}
-            placeholder="Ex.: Losartana 50 mg, de 12 em 12 horas, uso contínuo"
-            className="flex-1 resize-none rounded-2xl bg-chrome-tint px-4 py-3 text-lg font-semibold text-ink ring-1 ring-input outline-none focus:ring-2 focus:ring-ring"
-          />
-          <button
-            type="submit"
-            aria-label="Enviar mensagem"
-            className="chrome grid size-14 shrink-0 place-items-center rounded-2xl text-on-chrome ring-1 ring-on-chrome/50 active:scale-95"
+        {/* Área de gravação */}
+        <div className="mt-4 space-y-3">
+
+          {audioUrl ? (
+            <div className="rounded-2xl bg-chrome-tint p-4 ring-1 ring-input">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-ink">
+                    Áudio gravado
+                  </p>
+
+                  <p className="text-sm text-secondary">
+                    Duração: {formatarTempo(duracao)}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={cancelarAudio}
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-ink ring-1 ring-input"
+                >
+                  <RotateCcw className="size-4" />
+                  Gravar novamente
+                </button>
+              </div>
+
+              <audio
+                controls
+                src={audioUrl}
+                className="w-full"
+              />
+            </div>
+          ) : null}
+
+          <form
+            onSubmit={enviar}
+            className="flex items-end gap-2"
           >
-            <Send className="size-6" />
-          </button>
-        </form>
+            <textarea
+              value={texto}
+              onChange={(e) => setTexto(e.target.value)}
+              rows={2}
+              disabled={gravando}
+              placeholder={
+                gravando
+                  ? "Gravando áudio..."
+                  : "Ex.: Losartana 50 mg, de 12 em 12 horas, uso contínuo"
+              }
+              className="flex-1 resize-none rounded-2xl bg-chrome-tint px-4 py-3 text-lg font-semibold text-ink ring-1 ring-input outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+            />
+
+            {!gravando ? (
+              <button
+                type="button"
+                onClick={iniciarGravacao}
+                aria-label="Gravar áudio"
+                className="chrome grid size-14 shrink-0 place-items-center rounded-2xl text-on-chrome ring-1 ring-on-chrome/50 active:scale-95"
+              >
+                <Mic className="size-6" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={pararGravacao}
+                aria-label="Parar gravação"
+                className="chrome grid size-14 shrink-0 place-items-center rounded-2xl text-on-chrome ring-1 ring-on-chrome/50 active:scale-95"
+              >
+                <Square className="size-5" />
+              </button>
+            )}
+
+            <button
+              type="submit"
+              disabled={pensando || gravando}
+              aria-label="Enviar mensagem"
+              className="chrome grid size-14 shrink-0 place-items-center rounded-2xl text-on-chrome ring-1 ring-on-chrome/50 active:scale-95 disabled:opacity-50"
+            >
+              <Send className="size-6" />
+            </button>
+          </form>
+
+          {gravando ? (
+            <p className="text-center text-sm font-semibold text-mintink">
+              ● Gravando {formatarTempo(duracao)} — toque em parar quando
+              terminar.
+            </p>
+          ) : null}
+        </div>
       </section>
     </AppShell>
   );
@@ -220,7 +494,10 @@ function Linha({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
-      <dt className="font-medium text-inksoft">{rotulo}</dt>
+      <dt className="font-medium text-inksoft">
+        {rotulo}
+      </dt>
+
       <dd
         className={
           destaque
