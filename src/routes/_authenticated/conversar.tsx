@@ -13,12 +13,12 @@ import type { Patient } from "@/lib/capsula";
 export const Route = createFileRoute("/_authenticated/conversar")({
   head: () => ({
     meta: [
-      { title: "Conversar com a assistente — Cápsula" },
+      { title: "Conversar com a assistente — AICare" },
       {
         name: "description",
         content: "Descreva o remédio em suas palavras e a assistente monta a ficha com horários.",
       },
-      { property: "og:title", content: "Conversar com a assistente — Cápsula" },
+      { property: "og:title", content: "Conversar com a assistente — AICare" },
       {
         property: "og:description",
         content: "Descreva o remédio em suas palavras e a assistente monta a ficha com horários.",

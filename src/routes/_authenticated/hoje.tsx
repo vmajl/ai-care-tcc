@@ -19,9 +19,9 @@ import {
 export const Route = createFileRoute("/_authenticated/hoje")({
   head: () => ({
     meta: [
-      { title: "Agora — Cápsula" },
+      { title: "Agora — AICare" },
       { name: "description", content: "Veja o próximo remédio e a agenda de hoje." },
-      { property: "og:title", content: "Agora — Cápsula" },
+      { property: "og:title", content: "Agora — AICare" },
       { property: "og:description", content: "Veja o próximo remédio e a agenda de hoje." },
     ],
   }),

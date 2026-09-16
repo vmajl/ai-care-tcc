@@ -33,7 +33,7 @@ export function AppShell({ children, pacientes = [], pacienteId, onTrocarPacient
                 Lembretes
               </span>
               <span className="block font-display text-2xl leading-none font-semibold">
-                Cápsula
+                AICare
               </span>
             </span>
           </Link>

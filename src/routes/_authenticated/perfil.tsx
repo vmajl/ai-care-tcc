@@ -12,12 +12,12 @@ import { iniciais, type Patient } from "@/lib/capsula";
 export const Route = createFileRoute("/_authenticated/perfil")({
   head: () => ({
     meta: [
-      { title: "Pessoas e lembretes — Cápsula" },
+      { title: "Pessoas e lembretes — AICare" },
       {
         name: "description",
         content: "Cadastre as pessoas cuidadas e ative os avisos dos horários dos remédios.",
       },
-      { property: "og:title", content: "Pessoas e lembretes — Cápsula" },
+      { property: "og:title", content: "Pessoas e lembretes — AICare" },
       {
         property: "og:description",
         content: "Cadastre as pessoas cuidadas e ative os avisos dos horários dos remédios.",

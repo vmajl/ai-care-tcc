@@ -8,15 +8,15 @@ import { lovable } from "@/integrations/lovable/index";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Entrar na Cápsula" },
+      { title: "Entrar no AICare" },
       {
         name: "description",
-        content: "Acesse a Cápsula para ver os horários dos remédios de cada pessoa cuidada.",
+        content: "Acesse o AICare para ver os horários dos remédios de cada pessoa cuidada.",
       },
-      { property: "og:title", content: "Entrar na Cápsula" },
+      { property: "og:title", content: "Entrar no AICare" },
       {
         property: "og:description",
-        content: "Acesse a Cápsula para ver os horários dos remédios de cada pessoa cuidada.",
+        content: "Acesse o AICare para ver os horários dos remédios de cada pessoa cuidada.",
       },
     ],
   }),
@@ -87,7 +87,7 @@ function AuthPage() {
           <span className="chrome grid size-12 place-items-center rounded-2xl shadow-soft ring-1 ring-on-chrome/60">
             <Bell className="size-6 text-on-chrome" strokeWidth={2.5} />
           </span>
-          <span className="font-display text-2xl font-semibold">Cápsula</span>
+          <span className="font-display text-2xl font-semibold">AICare</span>
         </Link>
 
         {confirmar ? (
