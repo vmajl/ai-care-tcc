@@ -14,6 +14,8 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedConversarRouteImport } from './routes/_authenticated/conversar'
 import { Route as AuthenticatedHojeRouteImport } from './routes/_authenticated/hoje'
+import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedRemediosRouteImport } from './routes/_authenticated/remedios'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -39,18 +41,32 @@ const AuthenticatedHojeRoute = AuthenticatedHojeRouteImport.update({
   path: '/hoje',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRemediosRoute = AuthenticatedRemediosRouteImport.update({
+  id: '/remedios',
+  path: '/remedios',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/conversar': typeof AuthenticatedConversarRoute
   '/hoje': typeof AuthenticatedHojeRoute
+  '/perfil': typeof AuthenticatedPerfilRoute
+  '/remedios': typeof AuthenticatedRemediosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/conversar': typeof AuthenticatedConversarRoute
   '/hoje': typeof AuthenticatedHojeRoute
+  '/perfil': typeof AuthenticatedPerfilRoute
+  '/remedios': typeof AuthenticatedRemediosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -59,12 +75,14 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/conversar': typeof AuthenticatedConversarRoute
   '/_authenticated/hoje': typeof AuthenticatedHojeRoute
+  '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/remedios': typeof AuthenticatedRemediosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/conversar' | '/hoje'
+  fullPaths: '/' | '/auth' | '/conversar' | '/hoje' | '/perfil' | '/remedios'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/conversar' | '/hoje'
+  to: '/' | '/auth' | '/conversar' | '/hoje' | '/perfil' | '/remedios'
   id:
     | '__root__'
     | '/'
@@ -72,6 +90,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/conversar'
     | '/_authenticated/hoje'
+    | '/_authenticated/perfil'
+    | '/_authenticated/remedios'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -117,17 +137,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHojeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/perfil': {
+      id: '/_authenticated/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof AuthenticatedPerfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/remedios': {
+      id: '/_authenticated/remedios'
+      path: '/remedios'
+      fullPath: '/remedios'
+      preLoaderRoute: typeof AuthenticatedRemediosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedConversarRoute: typeof AuthenticatedConversarRoute
   AuthenticatedHojeRoute: typeof AuthenticatedHojeRoute
+  AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedRemediosRoute: typeof AuthenticatedRemediosRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConversarRoute: AuthenticatedConversarRoute,
   AuthenticatedHojeRoute: AuthenticatedHojeRoute,
+  AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedRemediosRoute: AuthenticatedRemediosRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
