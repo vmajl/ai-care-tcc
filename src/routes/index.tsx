@@ -7,7 +7,7 @@ export const Route = createFileRoute("/")({ component: Index });
 
 function Index() {
   const navigate = useNavigate();
-  useEffect(() => { supabase.auth.getSession().then(({ data }) => { if (data.session) navigate({ to: "/hoje" }); }); }, [navigate]);
+  useEffect(() => { supabase.auth.getSession().then(({ data }) => { if (data.session) navigate({ to: data.session.user.user_metadata?.tipo_usuario === "convidado" ? "/convidado" : "/hoje" }); }); }, [navigate]);
 
   return <div className="min-h-screen bg-canvas font-body text-lg text-ink"><main className="mx-auto max-w-[460px] space-y-6 px-5 py-8">
     <div className="flex items-center gap-3"><span className="chrome grid size-14 place-items-center rounded-2xl shadow-soft ring-1 ring-on-chrome/60"><Bell className="size-7 text-on-chrome" strokeWidth={2.5} /></span><div><p className="text-xs font-bold tracking-[0.18em] text-inksoft uppercase">Lembretes</p><h1 className="font-display text-3xl leading-none font-semibold">AICare</h1></div></div>
