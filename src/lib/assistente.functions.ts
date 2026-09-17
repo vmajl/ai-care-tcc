@@ -19,6 +19,8 @@ export type Sugestao = {
   continuo: boolean;
   data_fim: string | null;
   instrucoes: string | null;
+  quantidade_estoque: number;
+  unidade_estoque: string;
 };
 
 export type RespostaAssistente = {
@@ -29,7 +31,9 @@ export type RespostaAssistente = {
 const SISTEMA = `Você é a assistente do AICare, um aplicativo de lembretes de medicamentos usado por pessoas idosas e por cuidadores no Brasil.
 Fale sempre em português do Brasil, com frases curtas, gentis e simples.
 Seu trabalho é entender o medicamento que a pessoa descreve e preencher a ficha dele.
-Pergunte apenas o que faltar: nome do remédio, dosagem, de quantas em quantas horas, horário da primeira dose do dia, e se o uso é contínuo ou até uma data.
+Pergunte apenas o que faltar: nome do remédio, dosagem, de quantas em quantas horas, horário da primeira dose do dia, se o uso é contínuo ou até uma data, e quanto do medicamento o cuidador tem atualmente em posse.
+Para o estoque, pergunte a quantidade e a unidade correspondente, por exemplo: 30 comprimidos, 2 frascos, 100 mL ou 20 doses. A quantidade disponível é obrigatória para cadastrar o medicamento.
+A informação de estoque será usada posteriormente para calcular por quanto tempo o medicamento deve durar e alertar quando estiver acabando.
 Quando tiver todas as informações, chame a função registrar_medicamento e escreva uma frase pedindo a confirmação.
 Nunca dê conselhos médicos, não sugira doses e não mude o que foi receitado. Se perguntarem sobre saúde, oriente a falar com o médico ou farmacêutico.`;
 
@@ -66,7 +70,7 @@ export const conversarComAssistente = createServerFn({ method: "POST" })
             type: "function",
             function: {
               name: "registrar_medicamento",
-              description: "Registra a ficha do medicamento descrito pela pessoa.",
+              description: "Registra a ficha do medicamento, incluindo o estoque atualmente disponível.",
               parameters: {
                 type: "object",
                 properties: {
@@ -89,8 +93,24 @@ export const conversarComAssistente = createServerFn({ method: "POST" })
                     type: "string",
                     description: "Observação curta, ex.: tomar com água, após o almoço",
                   },
+                  quantidade_estoque: {
+                    type: "number",
+                    description: "Quantidade do medicamento que o cuidador possui atualmente",
+                  },
+                  unidade_estoque: {
+                    type: "string",
+                    description: "Unidade da quantidade em estoque, ex.: comprimidos, cápsulas, gotas, mL, doses ou frascos",
+                  },
                 },
-                required: ["nome", "dosagem", "intervalo_horas", "primeiro_horario", "continuo"],
+                required: [
+                  "nome",
+                  "dosagem",
+                  "intervalo_horas",
+                  "primeiro_horario",
+                  "continuo",
+                  "quantidade_estoque",
+                  "unidade_estoque",
+                ],
               },
             },
           },
@@ -125,6 +145,9 @@ export const conversarComAssistente = createServerFn({ method: "POST" })
     if (chamada?.function?.arguments) {
       try {
         const bruto = JSON.parse(chamada.function.arguments) as Record<string, unknown>;
+        const quantidade = Number(bruto["quantidade_estoque"]);
+        const unidade = String(bruto["unidade_estoque"] ?? "unidade").trim();
+
         sugestao = {
           nome: String(bruto["nome"] ?? "").slice(0, 120),
           dosagem: String(bruto["dosagem"] ?? "").slice(0, 80),
@@ -141,6 +164,8 @@ export const conversarComAssistente = createServerFn({ method: "POST" })
             typeof bruto["instrucoes"] === "string" && bruto["instrucoes"].trim()
               ? bruto["instrucoes"].slice(0, 200)
               : null,
+          quantidade_estoque: Number.isFinite(quantidade) ? Math.max(0, quantidade) : 0,
+          unidade_estoque: unidade.slice(0, 40) || "unidade",
         };
         if (sugestao.continuo) sugestao.data_fim = null;
       } catch (erro) {
