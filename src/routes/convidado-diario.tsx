@@ -1,12 +1,100 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Camera, ChevronLeft, ChevronRight, Clock3 } from "lucide-react";
 import { GuestShell } from "@/components/GuestShell";
-import { Camera, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/convidado-diario")({ component: DiarioConvidado });
 
-const diasComFoto: Record<number, string> = { 2: "17/09", 5: "20/09", 8: "23/09", 9: "24/09", 14: "29/09" };
+const FOTO_JOSE_17_09 = "/fotos/jose-17-09.png";
+const diasComFoto = new Set([17]);
 
 function DiarioConvidado() {
   const dias = Array.from({ length: 30 }, (_, i) => i + 1);
-  return <GuestShell><section><div className="flex items-center justify-between"><div><p className="text-base font-bold text-inksoft">Diário</p><h1 className="font-display text-4xl font-semibold">Setembro 2026</h1></div><Camera className="size-8 text-chrome-deep" /></div><div className="mt-5 flex items-center justify-between rounded-2xl bg-card p-3 ring-1 ring-border"><button className="rounded-xl p-2"><ChevronLeft /></button><span className="font-bold">Acompanhamento diário</span><button className="rounded-xl p-2"><ChevronRight /></button></div><div className="mt-4 grid grid-cols-7 gap-1 rounded-3xl bg-card p-3 shadow-soft ring-1 ring-border">{["dom.","seg.","ter.","qua.","qui.","sex.","sáb."].map((d) => <span key={d} className="py-2 text-center text-xs font-bold text-inksoft">{d}</span>)}{Array.from({ length: 2 }).map((_, i) => <span key={`empty-${i}`} />)}{dias.map((dia) => <div key={dia} className="min-h-20 rounded-xl p-1 text-center">{diasComFoto[dia] ? <div className="overflow-hidden rounded-xl bg-chrome-tint"><div className="grid h-14 place-items-center text-[10px] font-bold text-inksoft">📷</div></div> : <div className="grid h-14 place-items-center text-base font-semibold">{dia}</div>}<span className="mt-1 block text-[10px] font-bold text-inksoft">{dia}</span></div>)}</div><p className="mt-4 rounded-2xl bg-chrome-tint p-4 text-sm font-semibold text-inksoft">Os dias com foto representam os registros diários feitos pelo cuidador.</p></section></GuestShell>;
+
+  return (
+    <GuestShell>
+      <section className="space-y-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-base font-bold text-inksoft">Diário</p>
+            <h1 className="font-display text-4xl font-semibold">Setembro 2026</h1>
+            <p className="mt-1 text-base text-inksoft">Fotos e registros diários do José</p>
+          </div>
+          <Camera className="size-8 text-chrome-deep" />
+        </div>
+
+        <div className="mt-4 flex items-center justify-between rounded-2xl bg-card p-3 ring-1 ring-border">
+          <button type="button" className="rounded-xl p-2" aria-label="Mês anterior">
+            <ChevronLeft />
+          </button>
+          <span className="font-bold">Acompanhamento diário</span>
+          <button type="button" className="rounded-xl p-2" aria-label="Próximo mês">
+            <ChevronRight />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-7 gap-1 rounded-3xl bg-card p-3 shadow-soft ring-1 ring-border">
+          {["dom.", "seg.", "ter.", "qua.", "qui.", "sex.", "sáb."].map((d) => (
+            <span key={d} className="py-2 text-center text-xs font-bold text-inksoft">
+              {d}
+            </span>
+          ))}
+
+          {Array.from({ length: 2 }).map((_, i) => (
+            <span key={`empty-${i}`} />
+          ))}
+
+          {dias.map((dia) => {
+            const temFoto = diasComFoto.has(dia);
+
+            return (
+              <div
+                key={dia}
+                className={`min-h-20 rounded-xl p-1 text-center ${dia === 17 ? "bg-chrome-tint ring-2 ring-chrome" : ""}`}
+              >
+                {temFoto ? (
+                  <div className="overflow-hidden rounded-xl bg-chrome-tint">
+                    <img
+                      src={FOTO_JOSE_17_09}
+                      alt={`Registro de José em ${dia} de setembro de 2026`}
+                      className="h-14 w-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="grid h-14 place-items-center text-base font-semibold">{dia}</div>
+                )}
+                <span className="mt-1 block text-[10px] font-bold text-inksoft">{dia}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        <section className="rounded-3xl bg-card p-5 shadow-soft ring-1 ring-border">
+          <div className="overflow-hidden rounded-2xl bg-chrome-tint">
+            <img
+              src={FOTO_JOSE_17_09}
+              alt="José em seu registro diário de 17 de setembro de 2026"
+              className="max-h-80 w-full object-cover"
+            />
+          </div>
+
+          <div className="mt-4">
+            <p className="text-sm font-bold text-inksoft">Registro diário</p>
+            <h2 className="font-display text-2xl font-semibold">17 de setembro de 2026</h2>
+            <div className="mt-2 flex items-center gap-2 text-base font-semibold text-inksoft">
+              <Clock3 className="size-5" />
+              08:24
+            </div>
+            <p className="mt-4 text-base leading-relaxed text-inksoft">
+              Registro fotográfico diário de José. A família pode acompanhar a rotina e as
+              atualizações compartilhadas pelo cuidador.
+            </p>
+          </div>
+        </section>
+
+        <p className="rounded-2xl bg-chrome-tint p-4 text-sm font-semibold text-inksoft">
+          Os dias com foto representam os registros diários feitos pelo cuidador.
+        </p>
+      </section>
+    </GuestShell>
+  );
 }
