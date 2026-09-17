@@ -35,11 +35,14 @@ function Hoje() {
   const [fotoHoje, setFotoHoje] = useState<string | null>(null);
 
   const { data: pacientes = [] } = useQuery({
-    queryKey: ["pacientes"],
+    queryKey: ["pacientes", "cuidador"],
     queryFn: async (): Promise<Patient[]> => {
+      const { data: sessao } = await supabase.auth.getUser();
+      if (!sessao.user) return [];
       const { data, error } = await supabase
         .from("patients")
         .select("*")
+        .eq("owner_id", sessao.user.id)
         .order("created_at", { ascending: true });
       if (error) throw error;
       return data;
@@ -193,7 +196,7 @@ function Hoje() {
           </span>
           <div>
             <p className="font-display text-xl font-semibold">Foto de hoje</p>
-            <p className="text-sm font-semibold text-inksoft">Registre uma foto do José para a família acompanhar.</p>
+            <p className="text-sm font-semibold text-inksoft">Registre uma foto de {paciente?.nome ?? "quem você cuida"} para a família acompanhar.</p>
           </div>
         </div>
 
