@@ -28,9 +28,15 @@ function Remedios() {
   const [instrucoes, setInstrucoes] = useState("");
 
   const { data: pacientes = [] } = useQuery({
-    queryKey: ["pacientes"],
+    queryKey: ["pacientes", "cuidador"],
     queryFn: async (): Promise<Patient[]> => {
-      const { data, error } = await supabase.from("patients").select("*").order("created_at", { ascending: true });
+      const { data: sessao } = await supabase.auth.getUser();
+      if (!sessao.user) return [];
+      const { data, error } = await supabase
+        .from("patients")
+        .select("*")
+        .eq("owner_id", sessao.user.id)
+        .order("created_at", { ascending: true });
       if (error) throw error;
       return data;
     },
