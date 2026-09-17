@@ -63,11 +63,7 @@ function DiarioConvidado() {
               >
                 {temFoto ? (
                   <div className="overflow-hidden rounded-xl bg-chrome-tint">
-                    <img
-                      src={FOTO_JOSE_17_09}
-                      alt=""
-                      className="h-14 w-full object-cover"
-                    />
+                    <img src={FOTO_JOSE_17_09} alt="" className="h-14 w-full object-cover" />
                   </div>
                 ) : (
                   <div className="grid h-14 place-items-center text-base font-semibold">{dia}</div>
@@ -117,11 +113,6 @@ function DiarioConvidado() {
             </div>
           )}
         </section>
-
-        <div className="rounded-2xl bg-chrome-tint p-4 text-sm font-semibold text-inksoft">
-          <p>📷 Com foto: o registro fotográfico aparece no calendário.</p>
-          <p className="mt-1">○ Sem foto: nenhuma foto foi registrada neste dia.</p>
-        </div>
       </section>
     </GuestShell>
   );
