@@ -9,8 +9,6 @@ import type { Patient } from "@/lib/capsula";
 
 export const Route = createFileRoute("/_authenticated/diario")({ component: DiarioCuidador });
 
-const FOTO_JOSE_17_09 = "/fotos/jose-17-09.png";
-
 function DiarioCuidador() {
   const { data: pacientes = [] } = useQuery({
     queryKey: ["pacientes", "cuidador"],
@@ -32,22 +30,22 @@ function DiarioCuidador() {
 
   return (
     <AppShell pacientes={pacientes} pacienteId={pacienteId} onTrocarPaciente={selecionar}>
-      <DiarioCalendario nomePaciente={paciente?.nome ?? "quem você cuida"} />
+      <DiarioCalendario pacienteId={pacienteId} nomePaciente={paciente?.nome ?? "quem você cuida"} />
     </AppShell>
   );
 }
 
-function DiarioCalendario({ nomePaciente }: { nomePaciente: string }) {
+function DiarioCalendario({ pacienteId, nomePaciente }: { pacienteId: string | null; nomePaciente: string }) {
   const dias = Array.from({ length: 30 }, (_, i) => i + 1);
   const [diaSelecionado, setDiaSelecionado] = useState(17);
-  const [fotoDia17, setFotoDia17] = useState(FOTO_JOSE_17_09);
+  const [fotoDia17, setFotoDia17] = useState<string | null>(null);
 
   useEffect(() => {
-    const foto = localStorage.getItem("aicare_foto_hoje");
-    if (foto) setFotoDia17(foto);
-  }, []);
+    const foto = pacienteId ? localStorage.getItem(`aicare_foto_hoje_${pacienteId}`) : null;
+    setFotoDia17(foto);
+  }, [pacienteId]);
 
-  const temFotoSelecionada = diaSelecionado === 17;
+  const temFotoSelecionada = diaSelecionado === 17 && !!fotoDia17;
 
   return (
     <section className="space-y-5">
@@ -72,7 +70,7 @@ function DiarioCalendario({ nomePaciente }: { nomePaciente: string }) {
         ))}
         {Array.from({ length: 2 }).map((_, i) => <span key={`empty-${i}`} />)}
         {dias.map((dia) => {
-          const temFoto = dia === 17;
+          const temFoto = dia === 17 && !!fotoDia17;
           const selecionado = diaSelecionado === dia;
           return (
             <button
@@ -84,7 +82,7 @@ function DiarioCalendario({ nomePaciente }: { nomePaciente: string }) {
               className={`min-h-20 rounded-xl p-1 text-center transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-ring ${selecionado ? "bg-chrome-tint ring-2 ring-chrome" : "hover:bg-chrome-tint/60"}`}
             >
               {temFoto ? (
-                <div className="overflow-hidden rounded-xl bg-chrome-tint"><img src={fotoDia17} alt="" className="h-14 w-full object-cover" /></div>
+                <div className="overflow-hidden rounded-xl bg-chrome-tint"><img src={fotoDia17!} alt="" className="h-14 w-full object-cover" /></div>
               ) : (
                 <div className="grid h-14 place-items-center text-base font-semibold">{dia}</div>
               )}
@@ -97,7 +95,7 @@ function DiarioCalendario({ nomePaciente }: { nomePaciente: string }) {
       <section className="rounded-3xl bg-card p-5 shadow-soft ring-1 ring-border">
         {temFotoSelecionada ? (
           <>
-            <div className="overflow-hidden rounded-2xl bg-chrome-tint"><img src={fotoDia17} alt={`${nomePaciente} em seu registro diário de 17 de setembro de 2026`} className="max-h-80 w-full object-cover" /></div>
+            <div className="overflow-hidden rounded-2xl bg-chrome-tint"><img src={fotoDia17!} alt={`${nomePaciente} em seu registro diário de 17 de setembro de 2026`} className="max-h-80 w-full object-cover" /></div>
             <div className="mt-4">
               <p className="text-sm font-bold text-inksoft">Registro diário</p>
               <h2 className="font-display text-2xl font-semibold">17 de setembro de 2026</h2>
