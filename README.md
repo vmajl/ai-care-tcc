@@ -1,8 +1,7 @@
-# Meu Remédio
+# AI Care
 
-quero um aplicativo que auxilie pessoas idosas a se organizarem com relação aos horarios de tomada de medicamentos, então a pessoa conversa com a IA explica o nome dos medicamentos, a dosagem, de quantas em quantas horas, e se é algo continuo ou com tempo determinado. Precisa ser algo muito intuitivo por se tratar do publico alvo ser pessoas idosas. Mas, também pensei que cuidadores de idosos também possam utilizar o aplicativo, talvez até conseguindo separar por cada paciente. exemplo: Sou uma cuidadora com 2 pacientes e preciso administrar e lembrar quais remedios cada um toma, ai eu teria duas opções de acessos, e ao acessar teria todas as informações. Penso em fazer com que esse aplicativo envie notificações diárias como lembretes dos horários
 
-This project was built with [Lovable](https://lovable.dev).
+his project was built with [Lovable](https://lovable.dev).
 
 **Live app**: https://ai-care-tcc.lovable.app
 
