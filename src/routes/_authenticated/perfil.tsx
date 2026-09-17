@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Bell, Copy, KeyRound, LogOut, Plus, Share2, UserRound, Users } from "lucide-react";
+import { Bell, Copy, LogOut, Plus, Share2, UserRound, Users } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
@@ -33,7 +33,6 @@ function Perfil() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [nome, setNome] = useState("");
-  const [codigoDigitado, setCodigoDigitado] = useState("");
 
   const { data: usuarioId } = useQuery({
     queryKey: ["usuario-id"],
@@ -196,12 +195,6 @@ function Perfil() {
             </p>
           </section>
         ) : null}
-
-        <form onSubmit={(e) => { e.preventDefault(); const limpo = codigoDigitado.trim(); if (limpo) toast.info("O acesso por convite é feito pela opção Entrar como convidado na tela inicial."); }} className="rounded-3xl bg-card p-5 ring-1 ring-border shadow-soft">
-          <label htmlFor="codigo-convite" className="flex items-center gap-2 font-display text-lg font-semibold"><KeyRound className="size-5" />Recebi um código de convite</label>
-          <input id="codigo-convite" value={codigoDigitado} onChange={(e) => setCodigoDigitado(e.target.value.toUpperCase())} placeholder="Ex.: ABC123" autoCapitalize="characters" className="mt-3 w-full rounded-2xl bg-chrome-tint px-4 py-3 text-center font-display text-2xl font-bold tracking-[0.25em] text-ink ring-1 ring-input outline-none focus:ring-2 focus:ring-ring" />
-          <button type="submit" className="chrome mt-3 w-full rounded-2xl py-4 font-display text-xl font-bold text-on-chrome ring-1 ring-on-chrome/50 active:scale-95">Entrar como convidado</button>
-        </form>
 
         <form onSubmit={(e) => { e.preventDefault(); const limpo = nome.trim(); if (limpo) adicionar.mutate(limpo); }} className="rounded-3xl bg-card p-5 ring-1 ring-border shadow-soft">
           <label htmlFor="nova-pessoa" className="flex items-center gap-2 font-display text-lg font-semibold"><UserRound className="size-5" />Adicionar pessoa</label>
