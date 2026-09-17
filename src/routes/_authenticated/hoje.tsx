@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, MessageCircleHeart, Plus } from "lucide-react";
+import { Camera, Check, MessageCircleHeart, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
@@ -31,6 +32,7 @@ export const Route = createFileRoute("/_authenticated/hoje")({
 function Hoje() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [fotoHoje, setFotoHoje] = useState<string | null>(null);
 
   const { data: pacientes = [] } = useQuery({
     queryKey: ["pacientes"],
@@ -46,6 +48,11 @@ function Hoje() {
 
   const { pacienteId, selecionar } = usePacienteSelecionado(pacientes.map((p) => p.id));
   const paciente = pacientes.find((p) => p.id === pacienteId);
+
+  useEffect(() => {
+    const foto = localStorage.getItem("aicare_foto_hoje");
+    if (foto) setFotoHoje(foto);
+  }, []);
 
   const { data: meds = [] } = useQuery({
     queryKey: ["medicamentos", pacienteId],
@@ -108,13 +115,30 @@ function Hoje() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["doses"] }),
   });
 
+  function selecionarFoto(event: React.ChangeEvent<HTMLInputElement>) {
+    const arquivo = event.target.files?.[0];
+    if (!arquivo) return;
+
+    if (!arquivo.type.startsWith("image/")) {
+      toast.error("Selecione uma imagem.");
+      return;
+    }
+
+    const leitor = new FileReader();
+    leitor.onload = () => {
+      const resultado = String(leitor.result);
+      localStorage.setItem("aicare_foto_hoje", resultado);
+      setFotoHoje(resultado);
+      toast.success("Foto de hoje registrada.");
+    };
+    leitor.readAsDataURL(arquivo);
+  }
+
   if (pacientes.length === 0) {
     return (
       <AppShell>
         <section className="chrome rounded-3xl p-6 text-on-chrome shadow-soft ring-1 ring-on-chrome/50">
-          <h1 className="font-display text-3xl leading-tight font-semibold">
-            Quem vamos cuidar primeiro?
-          </h1>
+          <h1 className="font-display text-3xl leading-tight font-semibold">Quem vamos cuidar primeiro?</h1>
           <p className="mt-2 font-medium text-on-chrome/90">
             Cadastre você mesmo ou a pessoa que você cuida. Depois é possível adicionar outras.
           </p>
@@ -139,12 +163,9 @@ function Hoje() {
             </span>
             <span className="font-display text-2xl font-semibold">{proxima.hora}</span>
           </div>
-          <p className="mt-4 max-w-[24ch] font-display text-4xl leading-tight font-semibold text-balance">
-            {proxima.medication.nome}
-          </p>
+          <p className="mt-4 max-w-[24ch] font-display text-4xl leading-tight font-semibold text-balance">{proxima.medication.nome}</p>
           <p className="mt-1 text-lg font-medium text-on-chrome/90">
-            {proxima.medication.dosagem}
-            {proxima.medication.instrucoes ? ` · ${proxima.medication.instrucoes}` : ""}
+            {proxima.medication.dosagem}{proxima.medication.instrucoes ? ` · ${proxima.medication.instrucoes}` : ""}
           </p>
           <button
             onClick={() => marcar.mutate(proxima)}
@@ -160,20 +181,38 @@ function Hoje() {
             {meds.length === 0 ? "Nenhum remédio cadastrado" : "Tudo em ordem por hoje"}
           </p>
           <p className="mt-2 font-medium text-on-chrome/90">
-            {meds.length === 0
-              ? "Converse com a assistente para cadastrar o primeiro."
-              : "Todas as doses de hoje já foram tomadas."}
+            {meds.length === 0 ? "Converse com a assistente para cadastrar o primeiro." : "Todas as doses de hoje já foram tomadas."}
           </p>
         </section>
       )}
+
+      <section className="rounded-3xl bg-card p-5 shadow-soft ring-1 ring-border">
+        <div className="flex items-center gap-3">
+          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-chrome-tint text-chrome-deep ring-1 ring-border">
+            <Camera className="size-6" />
+          </span>
+          <div>
+            <p className="font-display text-xl font-semibold">Foto de hoje</p>
+            <p className="text-sm font-semibold text-inksoft">Registre uma foto do José para a família acompanhar.</p>
+          </div>
+        </div>
+
+        {fotoHoje ? (
+          <img src={fotoHoje} alt="Registro fotográfico de hoje" className="mt-4 h-56 w-full rounded-2xl object-cover" />
+        ) : null}
+
+        <label className="chrome mt-4 flex cursor-pointer items-center justify-center gap-2 rounded-2xl py-4 font-display text-xl font-bold text-on-chrome ring-1 ring-on-chrome/50 transition-transform hover:scale-[1.01] active:scale-95">
+          <Camera className="size-6" />
+          {fotoHoje ? "Trocar foto de hoje" : "Tirar foto de hoje"}
+          <input type="file" accept="image/*" capture="environment" className="hidden" onChange={selecionarFoto} />
+        </label>
+      </section>
 
       <section>
         <h2 className="mb-3 font-display text-xl font-semibold text-ink">Agenda de hoje</h2>
         <div className="space-y-2">
           {doses.length === 0 ? (
-            <p className="rounded-2xl bg-card p-4 text-inksoft ring-1 ring-border">
-              Ainda não há horários para hoje.
-            </p>
+            <p className="rounded-2xl bg-card p-4 text-inksoft ring-1 ring-border">Ainda não há horários para hoje.</p>
           ) : (
             doses.map((dose) => (
               <button
@@ -181,45 +220,15 @@ function Hoje() {
                 onClick={() => (dose.log ? desmarcar.mutate(dose) : marcar.mutate(dose))}
                 className="flex w-full items-center gap-3 rounded-2xl bg-card p-4 text-left ring-1 ring-border"
               >
-                <span
-                  className={
-                    dose.status === "tomado"
-                      ? "grid size-11 shrink-0 place-items-center rounded-xl bg-mint text-mintink"
-                      : dose.status === "atrasado"
-                        ? "grid size-11 shrink-0 place-items-center rounded-xl bg-amber font-display text-xl font-bold text-amberink"
-                        : "grid size-11 shrink-0 place-items-center rounded-xl bg-chrome-tint font-display text-xl font-bold text-chrome-deep"
-                  }
-                >
-                  {dose.status === "tomado" ? (
-                    <Check className="anim-check size-6" strokeWidth={3} />
-                  ) : dose.status === "atrasado" ? (
-                    "!"
-                  ) : (
-                    "·"
-                  )}
+                <span className={dose.status === "tomado" ? "grid size-11 shrink-0 place-items-center rounded-xl bg-mint text-mintink" : dose.status === "atrasado" ? "grid size-11 shrink-0 place-items-center rounded-xl bg-amber font-display text-xl font-bold text-amberink" : "grid size-11 shrink-0 place-items-center rounded-xl bg-chrome-tint font-display text-xl font-bold text-chrome-deep"}>
+                  {dose.status === "tomado" ? <Check className="anim-check size-6" strokeWidth={3} /> : dose.status === "atrasado" ? "!" : "·"}
                 </span>
                 <span className="flex-1">
-                  <span className="block font-display text-xl leading-none font-semibold">
-                    {dose.medication.nome}
-                  </span>
-                  <span className="block text-base text-inksoft">
-                    {dose.medication.dosagem} · {dose.hora}
-                  </span>
+                  <span className="block font-display text-xl leading-none font-semibold">{dose.medication.nome}</span>
+                  <span className="block text-base text-inksoft">{dose.medication.dosagem} · {dose.hora}</span>
                 </span>
-                <span
-                  className={
-                    dose.status === "tomado"
-                      ? "shrink-0 text-base font-bold text-mintink"
-                      : dose.status === "atrasado"
-                        ? "shrink-0 text-base font-bold text-coralink"
-                        : "shrink-0 text-base font-bold text-inksoft"
-                  }
-                >
-                  {dose.status === "tomado"
-                    ? "Tomado"
-                    : dose.status === "atrasado"
-                      ? "Atrasado"
-                      : "Aguardando"}
+                <span className={dose.status === "tomado" ? "shrink-0 text-base font-bold text-mintink" : dose.status === "atrasado" ? "shrink-0 text-base font-bold text-coralink" : "shrink-0 text-base font-bold text-inksoft"}>
+                  {dose.status === "tomado" ? "Tomado" : dose.status === "atrasado" ? "Atrasado" : "Aguardando"}
                 </span>
               </button>
             ))
@@ -234,14 +243,8 @@ function Hoje() {
           </span>
           <p className="font-display text-lg font-semibold">Assistente de doses</p>
         </div>
-        <p className="mt-3 text-inksoft">
-          Diga o nome do remédio, a dosagem e de quantas em quantas horas. A assistente monta a
-          ficha para você confirmar.
-        </p>
-        <Link
-          to="/conversar"
-          className="chrome mt-4 flex w-full items-center justify-center gap-2 rounded-2xl py-4 font-display text-xl font-bold text-on-chrome ring-1 ring-on-chrome/50 transition-transform hover:scale-[1.02] active:scale-95"
-        >
+        <p className="mt-3 text-inksoft">Diga o nome do remédio, a dosagem e de quantas em quantas horas. A assistente monta a ficha para você confirmar.</p>
+        <Link to="/conversar" className="chrome mt-4 flex w-full items-center justify-center gap-2 rounded-2xl py-4 font-display text-xl font-bold text-on-chrome ring-1 ring-on-chrome/50 transition-transform hover:scale-[1.02] active:scale-95">
           <Plus className="size-6" strokeWidth={3} />
           Adicionar remédio
         </Link>
@@ -254,9 +257,7 @@ function Hoje() {
             {meds.map((med) => (
               <div key={med.id} className="rounded-2xl bg-card p-4 ring-1 ring-border">
                 <p className="font-display text-xl leading-none font-semibold">{med.nome}</p>
-                <p className="text-base text-inksoft">
-                  {med.dosagem} · {descricaoFrequencia(med)}
-                </p>
+                <p className="text-base text-inksoft">{med.dosagem} · {descricaoFrequencia(med)}</p>
               </div>
             ))}
           </div>
