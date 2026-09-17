@@ -1,12 +1,21 @@
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Bell, CalendarDays, Home, Pill } from "lucide-react";
+import { Bell, CalendarDays, Home, LogOut, Pill } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 type Props = { children: ReactNode };
 
 export function GuestShell({ children }: Props) {
   const location = useLocation();
+  const navigate = useNavigate();
   const path = location.pathname;
+
+  async function sair() {
+    await supabase.auth.signOut();
+    localStorage.removeItem("aicare_codigo_convite");
+    localStorage.removeItem("aicare_foto_hoje");
+    navigate({ to: "/" });
+  }
 
   return (
     <div className="min-h-screen bg-canvas font-body text-lg text-ink">
@@ -21,7 +30,15 @@ export function GuestShell({ children }: Props) {
               <span className="block font-display text-2xl leading-none font-semibold">AICare</span>
             </span>
           </Link>
-          <span className="rounded-full bg-chrome-tint px-3 py-2 text-sm font-bold text-chrome-deep">Convidado</span>
+          <button
+            type="button"
+            onClick={sair}
+            className="flex items-center gap-2 rounded-full bg-card px-3 py-2 text-sm font-bold text-inksoft shadow-sm ring-1 ring-border transition-transform hover:scale-[1.02] active:scale-95"
+            aria-label="Sair do aplicativo"
+          >
+            <LogOut className="size-4" />
+            Sair
+          </button>
         </header>
 
         {children}
