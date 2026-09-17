@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Bell, Clock, Pill, User } from "lucide-react";
+import { Bell, CalendarDays, Clock, Pill, User } from "lucide-react";
 import type { Patient } from "@/lib/capsula";
 import { iniciais } from "@/lib/capsula";
 import {
@@ -32,46 +32,51 @@ export function AppShell({ children, pacientes = [], pacienteId, onTrocarPacient
               <span className="block text-xs font-bold tracking-[0.18em] text-inksoft uppercase">
                 Lembretes
               </span>
-              <span className="block font-display text-2xl leading-none font-semibold">
-                AICare
-              </span>
+              <span className="block font-display text-2xl leading-none font-semibold">AICare</span>
             </span>
           </Link>
 
-          {paciente ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger className="chrome-deep flex items-center gap-2 rounded-full py-1 pr-1 pl-4 shadow-sm ring-1 ring-on-chrome/50">
-                <span className="text-base font-bold text-on-chrome">
-                  {paciente.nome.split(" ")[0]}
-                </span>
-                <span className="grid size-9 place-items-center rounded-full bg-chrome-tint">
-                  <span className="text-sm font-bold text-chrome-deep">
-                    {iniciais(paciente.nome)}
+          <div className="flex items-center gap-2">
+            <Link
+              to="/convidado-notificacoes"
+              aria-label="Notificações"
+              className="grid size-11 place-items-center rounded-full bg-card text-chrome-deep shadow-sm ring-1 ring-border transition-transform hover:scale-105 active:scale-95"
+            >
+              <Bell className="size-5" />
+            </Link>
+
+            {paciente ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger className="chrome-deep flex items-center gap-2 rounded-full py-1 pr-1 pl-4 shadow-sm ring-1 ring-on-chrome/50">
+                  <span className="text-base font-bold text-on-chrome">{paciente.nome.split(" ")[0]}</span>
+                  <span className="grid size-9 place-items-center rounded-full bg-chrome-tint">
+                    <span className="text-sm font-bold text-chrome-deep">{iniciais(paciente.nome)}</span>
                   </span>
-                </span>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-52 rounded-2xl p-2">
-                {pacientes.map((p) => (
-                  <DropdownMenuItem
-                    key={p.id}
-                    onClick={() => onTrocarPaciente?.(p.id)}
-                    className="rounded-xl py-3 text-lg font-semibold"
-                  >
-                    {p.nome}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="min-w-52 rounded-2xl p-2">
+                  {pacientes.map((p) => (
+                    <DropdownMenuItem
+                      key={p.id}
+                      onClick={() => onTrocarPaciente?.(p.id)}
+                      className="rounded-xl py-3 text-lg font-semibold"
+                    >
+                      {p.nome}
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuItem asChild className="rounded-xl py-3 text-lg font-semibold">
+                    <Link to="/perfil">Gerenciar pessoas</Link>
                   </DropdownMenuItem>
-                ))}
-                <DropdownMenuItem asChild className="rounded-xl py-3 text-lg font-semibold">
-                  <Link to="/perfil">Gerenciar pessoas</Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : null}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : null}
+          </div>
         </header>
 
         {children}
 
-        <nav className="chrome grid grid-cols-3 gap-1 rounded-3xl p-2 shadow-soft ring-1 ring-on-chrome/50">
+        <nav className="chrome grid grid-cols-4 gap-1 rounded-3xl p-2 shadow-soft ring-1 ring-on-chrome/50">
           <NavItem to="/hoje" label="Agora" icon={<Clock className="size-7" />} />
+          <NavItem to="/convidado-diario" label="Diário" icon={<CalendarDays className="size-7" />} />
           <NavItem to="/remedios" label="Remédios" icon={<Pill className="size-7" />} />
           <NavItem to="/perfil" label="Pessoas" icon={<User className="size-7" />} />
         </nav>
