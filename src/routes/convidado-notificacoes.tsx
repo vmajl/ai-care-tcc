@@ -5,7 +5,7 @@ import { GuestShell } from "@/components/GuestShell";
 export const Route = createFileRoute("/convidado-notificacoes")({ component: NotificacoesConvidado });
 
 const avisos = [
-  { titulo: "Nova atualização", texto: "O cuidador registrou que Gabriel acordou bem e tomou café normalmente.", quando: "Hoje, 09:32", icon: MessageCircle },
+  { titulo: "Nova atualização", texto: "O cuidador registrou que José acordou bem e tomou café normalmente.", quando: "Hoje, 09:32", icon: MessageCircle },
   { titulo: "Novo registro diário", texto: "Uma nova foto foi adicionada ao diário do idoso.", quando: "Hoje, 09:20", icon: Camera },
   { titulo: "Estoque baixo", texto: "A Metformina 850 mg está próxima de acabar.", quando: "Ontem, 18:10", icon: Pill },
 ];
