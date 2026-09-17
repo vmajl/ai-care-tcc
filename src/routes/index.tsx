@@ -57,7 +57,13 @@ function Index() {
             to="/auth"
             className="mt-6 block w-full rounded-2xl bg-card py-5 text-center font-display text-2xl font-bold text-chrome-deep shadow-soft ring-1 ring-on-chrome/60 transition-transform hover:scale-[1.02] active:scale-95"
           >
-            Entrar
+            Entrar como cuidador
+          </Link>
+          <Link
+            to="/convidado"
+            className="mt-3 block w-full rounded-2xl bg-white/20 py-4 text-center font-display text-xl font-bold text-on-chrome ring-1 ring-on-chrome/50 transition-transform hover:scale-[1.02] active:scale-95"
+          >
+            Entrar como convidado
           </Link>
         </section>
 
