@@ -29,9 +29,7 @@ export function AppShell({ children, pacientes = [], pacienteId, onTrocarPacient
               <Bell className="size-6 text-on-chrome" strokeWidth={2.5} />
             </span>
             <span>
-              <span className="block text-xs font-bold tracking-[0.18em] text-inksoft uppercase">
-                Lembretes
-              </span>
+              <span className="block text-xs font-bold tracking-[0.18em] text-inksoft uppercase">Lembretes</span>
               <span className="block font-display text-2xl leading-none font-semibold">AICare</span>
             </span>
           </Link>
@@ -55,11 +53,7 @@ export function AppShell({ children, pacientes = [], pacienteId, onTrocarPacient
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="min-w-52 rounded-2xl p-2">
                   {pacientes.map((p) => (
-                    <DropdownMenuItem
-                      key={p.id}
-                      onClick={() => onTrocarPaciente?.(p.id)}
-                      className="rounded-xl py-3 text-lg font-semibold"
-                    >
+                    <DropdownMenuItem key={p.id} onClick={() => onTrocarPaciente?.(p.id)} className="rounded-xl py-3 text-lg font-semibold">
                       {p.nome}
                     </DropdownMenuItem>
                   ))}
@@ -76,7 +70,7 @@ export function AppShell({ children, pacientes = [], pacienteId, onTrocarPacient
 
         <nav className="chrome grid grid-cols-4 gap-1 rounded-3xl p-2 shadow-soft ring-1 ring-on-chrome/50">
           <NavItem to="/hoje" label="Agora" icon={<Clock className="size-7" />} />
-          <NavItem to="/convidado-diario" label="Diário" icon={<CalendarDays className="size-7" />} />
+          <NavItem to="/diario" label="Diário" icon={<CalendarDays className="size-7" />} />
           <NavItem to="/remedios" label="Remédios" icon={<Pill className="size-7" />} />
           <NavItem to="/perfil" label="Pessoas" icon={<User className="size-7" />} />
         </nav>
@@ -91,8 +85,7 @@ function NavItem({ to, label, icon }: { to: string; label: string; icon: ReactNo
       to={to}
       className="flex flex-col items-center gap-1 rounded-2xl py-3 text-on-chrome/90 transition-transform hover:scale-[1.02]"
       activeProps={{
-        className:
-          "flex flex-col items-center gap-1 rounded-2xl py-3 bg-white/25 text-on-chrome shadow-sm transition-transform",
+        className: "flex flex-col items-center gap-1 rounded-2xl py-3 bg-white/25 text-on-chrome shadow-sm transition-transform",
       }}
     >
       {icon}
