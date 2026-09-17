@@ -87,7 +87,7 @@ function NavItem({ to, label, icon }: { to: string; label: string; icon: ReactNo
       className="flex flex-col items-center gap-1 rounded-2xl py-3 text-on-chrome/90 transition-transform hover:scale-[1.02]"
       activeProps={{
         className:
-          "flex flex-col items-center gap-1 rounded-2xl py-3 bg-card text-ink shadow-sm ring-1 ring-border transition-transform",
+          "flex flex-col items-center gap-1 rounded-2xl py-3 bg-white/25 text-on-chrome shadow-sm transition-transform",
       }}
     >
       {icon}
