@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Bell } from "lucide-react";
+import { Bell, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/auth")({
       },
       { property: "og:title", content: "Entrar no AICare" },
       {
-        property: "og:description",
+        name: "description",
         content: "Acesse o AICare para ver os horários dos remédios de cada pessoa cuidada.",
       },
     ],
@@ -31,8 +31,21 @@ function AuthPage() {
   const [senha, setSenha] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [confirmar, setConfirmar] = useState(false);
+  const [modoConvidado, setModoConvidado] = useState(false);
+  const [codigoConvite, setCodigoConvite] = useState("");
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const convidado = params.get("modo") === "convidado";
+    const codigo = params.get("codigo")?.toUpperCase() ?? "";
+
+    if (convidado) {
+      setModo("criar");
+      setModoConvidado(true);
+      setCodigoConvite(codigo);
+      if (codigo) localStorage.setItem("aicare_codigo_convite", codigo);
+    }
+
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: "/hoje" });
     });
@@ -52,7 +65,7 @@ function AuthPage() {
           password: senha,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { nome },
+            data: { nome, tipo_usuario: modoConvidado ? "convidado" : "cuidador", codigo_convite: codigoConvite },
           },
         });
         if (error) throw error;
@@ -101,8 +114,18 @@ function AuthPage() {
         ) : (
           <section className="rounded-3xl bg-card p-6 ring-1 ring-border shadow-soft">
             <h1 className="font-display text-3xl leading-tight font-semibold">
-              {modo === "entrar" ? "Entrar" : "Criar minha conta"}
+              {modoConvidado ? "Criar conta de convidado" : modo === "entrar" ? "Entrar" : "Criar minha conta"}
             </h1>
+
+            {modoConvidado ? (
+              <div className="mt-3 rounded-2xl bg-chrome-tint p-4 text-base text-inksoft ring-1 ring-border">
+                <div className="flex items-center gap-2 font-bold text-chrome-deep">
+                  <UserPlus className="size-5" />
+                  Convite: {codigoConvite || "código recebido"}
+                </div>
+                <p className="mt-1">Crie sua conta para acompanhar os registros compartilhados pelo cuidador.</p>
+              </div>
+            ) : null}
 
             <form onSubmit={enviar} className="mt-5 space-y-4">
               {modo === "criar" ? (
@@ -140,19 +163,30 @@ function AuthPage() {
               </button>
             </form>
 
-            <button
-              onClick={entrarComGoogle}
-              className="mt-3 w-full rounded-2xl bg-chrome-tint py-4 font-display text-xl font-bold text-chrome-deep ring-1 ring-border transition-transform hover:scale-[1.02] active:scale-95"
-            >
-              Entrar com o Google
-            </button>
+            {!modoConvidado ? (
+              <>
+                <button
+                  onClick={entrarComGoogle}
+                  className="mt-3 w-full rounded-2xl bg-chrome-tint py-4 font-display text-xl font-bold text-chrome-deep ring-1 ring-border transition-transform hover:scale-[1.02] active:scale-95"
+                >
+                  Entrar com o Google
+                </button>
 
-            <button
-              onClick={() => setModo(modo === "entrar" ? "criar" : "entrar")}
-              className="mt-5 w-full text-center text-base font-bold text-inksoft underline"
-            >
-              {modo === "entrar" ? "Ainda não tenho conta" : "Já tenho uma conta"}
-            </button>
+                <Link
+                  to="/convidado"
+                  className="mt-3 block w-full rounded-2xl bg-chrome-tint py-4 text-center font-display text-xl font-bold text-chrome-deep ring-1 ring-border transition-transform hover:scale-[1.02] active:scale-95"
+                >
+                  Entrar como convidado
+                </Link>
+
+                <button
+                  onClick={() => setModo(modo === "entrar" ? "criar" : "entrar")}
+                  className="mt-5 w-full text-center text-base font-bold text-inksoft underline"
+                >
+                  {modo === "entrar" ? "Ainda não tenho conta" : "Já tenho uma conta"}
+                </button>
+              </>
+            ) : null}
           </section>
         )}
       </main>
