@@ -31,12 +31,16 @@ function ConvidadoPage() {
 
     setCarregando(true);
 
-    // Nesta primeira etapa, apenas montamos a tela e o fluxo visual.
-    // A validação real do código será conectada ao backend depois.
+    // O código será validado pelo backend quando a integração estiver pronta.
+    // Por enquanto, guardamos o código para vinculá-lo à conta criada.
+    localStorage.setItem("aicare_codigo_convite", codigoNormalizado);
+
     setTimeout(() => {
       setCarregando(false);
-      toast.info("O código será validado pelo sistema quando o backend estiver conectado.");
-    }, 500);
+      navigate({ to: "/auth" });
+      window.history.replaceState(null, "", `/auth?modo=convidado&codigo=${encodeURIComponent(codigoNormalizado)}`);
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    }, 300);
   }
 
   return (
@@ -94,7 +98,7 @@ function ConvidadoPage() {
             disabled={carregando}
             className="chrome mt-4 w-full rounded-2xl py-5 font-display text-2xl font-bold text-on-chrome shadow-soft ring-1 ring-on-chrome/50 transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-70"
           >
-            {carregando ? "Verificando…" : "Entrar"}
+            {carregando ? "Continuando…" : "Continuar"}
           </button>
         </section>
 
@@ -103,7 +107,7 @@ function ConvidadoPage() {
             Você recebeu um código do cuidador?
           </p>
           <p className="mt-1 text-sm text-inksoft">
-            Use esse código para acompanhar atualizações, registros de medicamentos e fotos do idoso.
+            Depois de informar o código, você criará sua conta com e-mail e senha para acompanhar atualizações, registros de medicamentos e fotos do idoso.
           </p>
         </section>
       </main>
