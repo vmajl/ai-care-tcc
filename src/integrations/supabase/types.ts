@@ -109,6 +109,70 @@ export type Database = {
           },
         ]
       }
+      patient_invites: {
+        Row: {
+          ativo: boolean
+          code: string
+          criado_em: string
+          id: string
+          owner_id: string
+          patient_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          code: string
+          criado_em?: string
+          id?: string
+          owner_id: string
+          patient_id: string
+        }
+        Update: {
+          ativo?: boolean
+          code?: string
+          criado_em?: string
+          id?: string
+          owner_id?: string
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_invites_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_members: {
+        Row: {
+          criado_em: string
+          id: string
+          patient_id: string
+          user_id: string
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          patient_id: string
+          user_id: string
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          patient_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_members_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patients: {
         Row: {
           created_at: string
@@ -156,7 +220,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      entrar_com_codigo: { Args: { _code: string }; Returns: string }
+      gerar_codigo_convite: { Args: { _patient_id: string }; Returns: string }
+      pode_ver_paciente: {
+        Args: { _patient_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
