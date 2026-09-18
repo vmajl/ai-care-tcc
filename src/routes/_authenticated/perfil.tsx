@@ -152,8 +152,8 @@ function Perfil() {
                 onClick={() => selecionar(p.id)}
                 className={
                   p.id === pacienteId
-                    ? "chrome flex w-full items-center gap-4 rounded-3xl p-4 text-on-chrome shadow-soft ring-1 ring-on-chrome/50"
-                    : "flex w-full items-center gap-4 rounded-3xl bg-card p-4 ring-1 ring-border shadow-soft"
+                    ? "chrome flex w-full items-center gap-4 rounded-xl p-4 text-on-chrome ring-1 ring-on-chrome/50"
+                    : "flex w-full items-center gap-4 rounded-xl bg-card p-4 ring-1 ring-border shadow-soft"
                 }
               >
                 <span className="grid size-12 shrink-0 place-items-center rounded-full bg-chrome-tint">
@@ -171,7 +171,7 @@ function Perfil() {
         </ul>
 
         {paciente && souDono ? (
-          <section className="rounded-3xl bg-card p-5 ring-1 ring-border shadow-soft">
+          <section className="rounded-xl bg-card p-5 ring-1 ring-border shadow-soft">
             <h2 className="flex items-center gap-2 font-display text-xl font-semibold">
               <Users className="size-5" />
               Convidar a família
@@ -179,14 +179,14 @@ function Perfil() {
             <p className="mt-2 text-base text-inksoft">
               Compartilhe este código com quem também quiser acompanhar os remédios de {paciente.nome}.
             </p>
-            <p className="chrome mt-4 rounded-2xl py-4 text-center font-display text-4xl font-bold tracking-[0.3em] text-on-chrome ring-1 ring-on-chrome/50">
+            <p className="chrome mt-4 rounded-xl py-4 text-center font-display text-4xl font-bold tracking-[0.3em] text-on-chrome ring-1 ring-on-chrome/50">
               {codigo ?? "······"}
             </p>
             <div className="mt-3 grid grid-cols-2 gap-3">
-              <button onClick={() => codigo && copiar(codigo)} className="flex items-center justify-center gap-2 rounded-2xl bg-chrome-tint py-4 font-display text-lg font-bold text-chrome-deep ring-1 ring-border active:scale-95">
+              <button onClick={() => codigo && copiar(codigo)} className="flex items-center justify-center gap-2 rounded-xl bg-chrome-tint py-4 font-display text-lg font-bold text-chrome-deep ring-1 ring-border active:scale-95">
                 <Copy className="size-5" />Copiar
               </button>
-              <button onClick={compartilhar} className="flex items-center justify-center gap-2 rounded-2xl bg-mint py-4 font-display text-lg font-bold text-mintink ring-1 ring-mintink/20 active:scale-95">
+              <button onClick={compartilhar} className="flex items-center justify-center gap-2 rounded-xl bg-mint py-4 font-display text-lg font-bold text-mintink ring-1 ring-mintink/20 active:scale-95">
                 <Share2 className="size-5" />Enviar
               </button>
             </div>
@@ -196,18 +196,18 @@ function Perfil() {
           </section>
         ) : null}
 
-        <form onSubmit={(e) => { e.preventDefault(); const limpo = nome.trim(); if (limpo) adicionar.mutate(limpo); }} className="rounded-3xl bg-card p-5 ring-1 ring-border shadow-soft">
+        <form onSubmit={(e) => { e.preventDefault(); const limpo = nome.trim(); if (limpo) adicionar.mutate(limpo); }} className="rounded-xl bg-card p-5 ring-1 ring-border shadow-soft">
           <label htmlFor="nova-pessoa" className="flex items-center gap-2 font-display text-lg font-semibold"><UserRound className="size-5" />Adicionar pessoa</label>
-          <input id="nova-pessoa" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex.: Dona Maria" className="mt-3 w-full rounded-2xl bg-chrome-tint px-4 py-3 text-lg font-semibold text-ink ring-1 ring-input outline-none focus:ring-2 focus:ring-ring" />
-          <button type="submit" disabled={adicionar.isPending} className="chrome mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-4 font-display text-xl font-bold text-on-chrome ring-1 ring-on-chrome/50 active:scale-95 disabled:opacity-70"><Plus className="size-6" />Salvar</button>
+          <input id="nova-pessoa" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex.: Dona Maria" className="mt-3 w-full rounded-xl bg-chrome-tint px-4 py-3 text-lg font-semibold text-ink ring-1 ring-input outline-none focus:ring-2 focus:ring-ring" />
+          <button type="submit" disabled={adicionar.isPending} className="chrome mt-3 flex w-full items-center justify-center gap-2 rounded-xl py-4 font-display text-xl font-bold text-on-chrome ring-1 ring-on-chrome/50 active:scale-95 disabled:opacity-70"><Plus className="size-6" />Salvar</button>
         </form>
 
-        <button onClick={ativarAvisos} className="flex w-full items-center gap-3 rounded-3xl bg-mint p-5 text-left ring-1 ring-mintink/20 active:scale-95">
+        <button onClick={ativarAvisos} className="flex w-full items-center gap-3 rounded-xl bg-mint p-5 text-left ring-1 ring-mintink/20 active:scale-95">
           <Bell className="size-7 shrink-0 text-mintink" />
           <span><span className="block font-display text-xl font-semibold text-mintink">Ativar avisos dos horários</span><span className="block text-base font-semibold text-mintink/80">O aparelho avisa na hora de cada remédio.</span></span>
         </button>
 
-        <button onClick={sair} className="flex w-full items-center justify-center gap-2 rounded-3xl bg-card py-4 font-display text-lg font-bold text-inksoft ring-1 ring-border active:scale-95"><LogOut className="size-5" />Sair da conta</button>
+        <button onClick={sair} className="flex w-full items-center justify-center gap-2 rounded-xl bg-card py-4 font-display text-lg font-bold text-inksoft ring-1 ring-border active:scale-95"><LogOut className="size-5" />Sair da conta</button>
       </section>
     </AppShell>
   );
