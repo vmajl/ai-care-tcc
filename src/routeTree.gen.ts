@@ -12,7 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ConvidadoRouteImport } from './routes/convidado'
+import { Route as ConvidadoDiarioRouteImport } from './routes/convidado-diario'
+import { Route as ConvidadoMedicamentosRouteImport } from './routes/convidado-medicamentos'
+import { Route as ConvidadoNotificacoesRouteImport } from './routes/convidado-notificacoes'
+import { Route as ConviteRouteImport } from './routes/convite'
 import { Route as AuthenticatedConversarRouteImport } from './routes/_authenticated/conversar'
+import { Route as AuthenticatedDiarioRouteImport } from './routes/_authenticated/diario'
 import { Route as AuthenticatedHojeRouteImport } from './routes/_authenticated/hoje'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedRemediosRouteImport } from './routes/_authenticated/remedios'
@@ -31,9 +37,39 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConvidadoRoute = ConvidadoRouteImport.update({
+  id: '/convidado',
+  path: '/convidado',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConvidadoDiarioRoute = ConvidadoDiarioRouteImport.update({
+  id: '/convidado-diario',
+  path: '/convidado-diario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConvidadoMedicamentosRoute = ConvidadoMedicamentosRouteImport.update({
+  id: '/convidado-medicamentos',
+  path: '/convidado-medicamentos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConvidadoNotificacoesRoute = ConvidadoNotificacoesRouteImport.update({
+  id: '/convidado-notificacoes',
+  path: '/convidado-notificacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConviteRoute = ConviteRouteImport.update({
+  id: '/convite',
+  path: '/convite',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedConversarRoute = AuthenticatedConversarRouteImport.update({
   id: '/conversar',
   path: '/conversar',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDiarioRoute = AuthenticatedDiarioRouteImport.update({
+  id: '/diario',
+  path: '/diario',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedHojeRoute = AuthenticatedHojeRouteImport.update({
@@ -55,7 +91,13 @@ const AuthenticatedRemediosRoute = AuthenticatedRemediosRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/convidado': typeof ConvidadoRoute
+  '/convidado-diario': typeof ConvidadoDiarioRoute
+  '/convidado-medicamentos': typeof ConvidadoMedicamentosRoute
+  '/convidado-notificacoes': typeof ConvidadoNotificacoesRoute
+  '/convite': typeof ConviteRoute
   '/conversar': typeof AuthenticatedConversarRoute
+  '/diario': typeof AuthenticatedDiarioRoute
   '/hoje': typeof AuthenticatedHojeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/remedios': typeof AuthenticatedRemediosRoute
@@ -63,7 +105,13 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/convidado': typeof ConvidadoRoute
+  '/convidado-diario': typeof ConvidadoDiarioRoute
+  '/convidado-medicamentos': typeof ConvidadoMedicamentosRoute
+  '/convidado-notificacoes': typeof ConvidadoNotificacoesRoute
+  '/convite': typeof ConviteRoute
   '/conversar': typeof AuthenticatedConversarRoute
+  '/diario': typeof AuthenticatedDiarioRoute
   '/hoje': typeof AuthenticatedHojeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/remedios': typeof AuthenticatedRemediosRoute
@@ -73,22 +121,58 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/convidado': typeof ConvidadoRoute
+  '/convidado-diario': typeof ConvidadoDiarioRoute
+  '/convidado-medicamentos': typeof ConvidadoMedicamentosRoute
+  '/convidado-notificacoes': typeof ConvidadoNotificacoesRoute
+  '/convite': typeof ConviteRoute
   '/_authenticated/conversar': typeof AuthenticatedConversarRoute
+  '/_authenticated/diario': typeof AuthenticatedDiarioRoute
   '/_authenticated/hoje': typeof AuthenticatedHojeRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/remedios': typeof AuthenticatedRemediosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/conversar' | '/hoje' | '/perfil' | '/remedios'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/convidado'
+    | '/convidado-diario'
+    | '/convidado-medicamentos'
+    | '/convidado-notificacoes'
+    | '/convite'
+    | '/conversar'
+    | '/diario'
+    | '/hoje'
+    | '/perfil'
+    | '/remedios'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/conversar' | '/hoje' | '/perfil' | '/remedios'
+  to:
+    | '/'
+    | '/auth'
+    | '/convidado'
+    | '/convidado-diario'
+    | '/convidado-medicamentos'
+    | '/convidado-notificacoes'
+    | '/convite'
+    | '/conversar'
+    | '/diario'
+    | '/hoje'
+    | '/perfil'
+    | '/remedios'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/convidado'
+    | '/convidado-diario'
+    | '/convidado-medicamentos'
+    | '/convidado-notificacoes'
+    | '/convite'
     | '/_authenticated/conversar'
+    | '/_authenticated/diario'
     | '/_authenticated/hoje'
     | '/_authenticated/perfil'
     | '/_authenticated/remedios'
@@ -98,6 +182,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ConvidadoRoute: typeof ConvidadoRoute
+  ConvidadoDiarioRoute: typeof ConvidadoDiarioRoute
+  ConvidadoMedicamentosRoute: typeof ConvidadoMedicamentosRoute
+  ConvidadoNotificacoesRoute: typeof ConvidadoNotificacoesRoute
+  ConviteRoute: typeof ConviteRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -123,11 +212,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/convidado': {
+      id: '/convidado'
+      path: '/convidado'
+      fullPath: '/convidado'
+      preLoaderRoute: typeof ConvidadoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/convidado-diario': {
+      id: '/convidado-diario'
+      path: '/convidado-diario'
+      fullPath: '/convidado-diario'
+      preLoaderRoute: typeof ConvidadoDiarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/convidado-medicamentos': {
+      id: '/convidado-medicamentos'
+      path: '/convidado-medicamentos'
+      fullPath: '/convidado-medicamentos'
+      preLoaderRoute: typeof ConvidadoMedicamentosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/convidado-notificacoes': {
+      id: '/convidado-notificacoes'
+      path: '/convidado-notificacoes'
+      fullPath: '/convidado-notificacoes'
+      preLoaderRoute: typeof ConvidadoNotificacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/convite': {
+      id: '/convite'
+      path: '/convite'
+      fullPath: '/convite'
+      preLoaderRoute: typeof ConviteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/conversar': {
       id: '/_authenticated/conversar'
       path: '/conversar'
       fullPath: '/conversar'
       preLoaderRoute: typeof AuthenticatedConversarRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/diario': {
+      id: '/_authenticated/diario'
+      path: '/diario'
+      fullPath: '/diario'
+      preLoaderRoute: typeof AuthenticatedDiarioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/hoje': {
@@ -156,6 +287,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedConversarRoute: typeof AuthenticatedConversarRoute
+  AuthenticatedDiarioRoute: typeof AuthenticatedDiarioRoute
   AuthenticatedHojeRoute: typeof AuthenticatedHojeRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedRemediosRoute: typeof AuthenticatedRemediosRoute
@@ -163,6 +295,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConversarRoute: AuthenticatedConversarRoute,
+  AuthenticatedDiarioRoute: AuthenticatedDiarioRoute,
   AuthenticatedHojeRoute: AuthenticatedHojeRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedRemediosRoute: AuthenticatedRemediosRoute,
@@ -175,6 +308,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ConvidadoRoute: ConvidadoRoute,
+  ConvidadoDiarioRoute: ConvidadoDiarioRoute,
+  ConvidadoMedicamentosRoute: ConvidadoMedicamentosRoute,
+  ConvidadoNotificacoesRoute: ConvidadoNotificacoesRoute,
+  ConviteRoute: ConviteRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
