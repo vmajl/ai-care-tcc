@@ -93,7 +93,7 @@ function DiarioCalendario({ nomePaciente }: { nomePaciente: string }) {
         <Camera className="size-8 text-chrome-deep" />
       </div>
 
-      <div className="mt-4 flex items-center justify-between rounded-2xl bg-card p-3 ring-1 ring-border">
+      <div className="mt-4 flex items-center justify-between rounded-xl bg-card p-3 ring-1 ring-border">
         <button type="button" className="rounded-xl p-2" aria-label="Mês anterior">
           <ChevronLeft />
         </button>
@@ -103,7 +103,7 @@ function DiarioCalendario({ nomePaciente }: { nomePaciente: string }) {
         </button>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 rounded-3xl bg-card p-3 shadow-soft ring-1 ring-border">
+      <div className="grid grid-cols-7 gap-1 rounded-xl bg-card p-3 ring-1 ring-border">
         {["dom.", "seg.", "ter.", "qua.", "qui.", "sex.", "sáb."].map((d) => (
           <span key={d} className="py-2 text-center text-xs font-bold text-inksoft">{d}</span>
         ))}
@@ -136,7 +136,7 @@ function DiarioCalendario({ nomePaciente }: { nomePaciente: string }) {
         })}
       </div>
 
-      <section className="rounded-3xl bg-card p-5 shadow-soft ring-1 ring-border">
+      <section className="rounded-xl bg-card p-5 ring-1 ring-border">
         {temFotoSelecionada ? (
           <>
             <div className="overflow-hidden rounded-2xl bg-chrome-tint">
