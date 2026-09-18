@@ -8,7 +8,7 @@ import { lovable } from "@/integrations/lovable/index";
 export const Route = createFileRoute("/auth")({ component: AuthPage });
 
 function destinoParaUsuario(user: { user_metadata?: Record<string, unknown> }) {
-  return user.user_metadata?.tipo_usuario === "convidado" ? "/convidado" : "/hoje";
+  return user.user_metadata?.["tipo_usuario"] === "convidado" ? "/convidado" : "/hoje";
 }
 
 function AuthPage() {
