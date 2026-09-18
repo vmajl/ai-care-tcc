@@ -25,11 +25,11 @@ export function AppShell({ children, pacientes = [], pacienteId, onTrocarPacient
       <main className="mx-auto max-w-[460px] space-y-6 px-5 py-6 pb-8">
         <header className="flex items-center justify-between gap-3">
           <Link to="/hoje" className="flex items-center gap-3">
-            <span className="chrome grid size-12 place-items-center rounded-2xl shadow-soft ring-1 ring-on-chrome/60">
+            <span className="chrome grid size-12 place-items-center rounded-xl ring-1 ring-on-chrome/60">
               <Bell className="size-6 text-on-chrome" strokeWidth={2.5} />
             </span>
             <span>
-              <span className="block text-xs font-bold tracking-[0.18em] text-inksoft uppercase">Lembretes</span>
+              <span className="block text-xs font-bold tracking-[0.14em] text-inksoft uppercase">Acompanhamento</span>
               <span className="block font-display text-2xl leading-none font-semibold">AICare</span>
             </span>
           </Link>
@@ -38,7 +38,7 @@ export function AppShell({ children, pacientes = [], pacienteId, onTrocarPacient
             <Link
               to="/convidado-notificacoes"
               aria-label="Notificações"
-              className="grid size-11 place-items-center rounded-full bg-card text-chrome-deep shadow-sm ring-1 ring-border transition-transform hover:scale-105 active:scale-95"
+              className="grid size-11 place-items-center rounded-xl bg-card text-chrome-deep ring-1 ring-border transition-transform hover:scale-105 active:scale-95"
             >
               <Bell className="size-5" />
             </Link>
@@ -68,10 +68,10 @@ export function AppShell({ children, pacientes = [], pacienteId, onTrocarPacient
 
         {children}
 
-        <nav className="chrome grid grid-cols-4 gap-1 rounded-3xl p-2 shadow-soft ring-1 ring-on-chrome/50">
-          <NavItem to="/hoje" label="Agora" icon={<Clock className="size-7" />} />
+        <nav className="chrome grid grid-cols-4 gap-1 rounded-xl p-2 ring-1 ring-on-chrome/50">
+          <NavItem to="/hoje" label="Início" icon={<Clock className="size-7" />} />
           <NavItem to="/diario" label="Diário" icon={<CalendarDays className="size-7" />} />
-          <NavItem to="/remedios" label="Remédios" icon={<Pill className="size-7" />} />
+          <NavItem to="/remedios" label="Medicamentos" icon={<Pill className="size-7" />} />
           <NavItem to="/perfil" label="Pessoas" icon={<User className="size-7" />} />
         </nav>
       </main>
@@ -83,9 +83,9 @@ function NavItem({ to, label, icon }: { to: string; label: string; icon: ReactNo
   return (
     <Link
       to={to}
-      className="flex flex-col items-center gap-1 rounded-2xl py-3 text-on-chrome/90 transition-transform hover:scale-[1.02]"
+      className="flex flex-col items-center gap-1 rounded-lg py-3 text-on-chrome/90"
       activeProps={{
-        className: "flex flex-col items-center gap-1 rounded-2xl py-3 bg-white/25 text-on-chrome shadow-sm transition-transform",
+        className: "flex flex-col items-center gap-1 rounded-2xl py-3 bg-white/25 text-on-chrome",
       }}
     >
       {icon}
