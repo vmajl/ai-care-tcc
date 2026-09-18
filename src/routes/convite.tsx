@@ -23,7 +23,7 @@ function ConvitePage() {
       return;
     }
 
-    navigate({ to: "/auth", search: undefined });
+    navigate({ to: "/auth" });
     window.history.replaceState(null, "", `/auth?modo=convidado&codigo=${encodeURIComponent(normalizado)}`);
     window.dispatchEvent(new PopStateEvent("popstate"));
   }

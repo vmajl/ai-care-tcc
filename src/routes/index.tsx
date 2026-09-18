@@ -7,7 +7,7 @@ export const Route = createFileRoute("/")({ component: Index });
 
 function Index() {
   const navigate = useNavigate();
-  useEffect(() => { supabase.auth.getSession().then(({ data }) => { if (data.session) navigate({ to: data.session.user.user_metadata?.tipo_usuario === "convidado" ? "/convidado" : "/hoje" }); }); }, [navigate]);
+  useEffect(() => { supabase.auth.getSession().then(({ data }) => { if (data.session) navigate({ to: data.session.user.user_metadata?.["tipo_usuario"] === "convidado" ? "/convidado" : "/hoje" }); }); }, [navigate]);
 
   return (
     <div className="min-h-screen bg-canvas font-body text-ink">
