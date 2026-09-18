@@ -107,13 +107,13 @@ function Remedios() {
           <span className="text-base font-bold text-inksoft">{ativos.length} em uso</span>
         </div>
 
-        <Link to="/conversar" className="chrome flex items-center gap-3 rounded-3xl px-5 py-4 text-on-chrome shadow-soft ring-1 ring-on-chrome/50 transition-transform hover:scale-[1.01] active:scale-95">
+        <Link to="/conversar" className="chrome flex items-center gap-3 rounded-xl px-5 py-4 text-on-chrome ring-1 ring-on-chrome/50 transition-transform hover:scale-[1.01] active:scale-95">
           <MessageCircle className="size-7 shrink-0" />
           <span className="font-display text-xl font-semibold">Adicionar conversando</span>
         </Link>
 
         {isLoading ? <p className="text-lg font-bold text-inksoft">Carregando…</p> : ativos.length === 0 ? (
-          <div className="rounded-3xl bg-card p-6 text-center ring-1 ring-border shadow-soft">
+          <div className="rounded-xl bg-card p-6 text-center ring-1 ring-border shadow-soft">
             <Pill className="mx-auto size-10 text-inksoft" />
             <p className="mt-3 font-display text-xl font-semibold">Nenhum remédio ainda</p>
             <p className="mt-1 text-base font-semibold text-inksoft">Toque em “Adicionar conversando” e conte o nome do remédio.</p>
@@ -121,7 +121,7 @@ function Remedios() {
         ) : (
           <ul className="space-y-3">
             {ativos.map((med) => (
-              <li key={med.id} className="rounded-3xl bg-card p-5 ring-1 ring-border shadow-soft">
+              <li key={med.id} className="rounded-xl bg-card p-5 ring-1 ring-border shadow-soft">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-display text-2xl leading-tight font-semibold">{med.nome}</p>
@@ -131,7 +131,7 @@ function Remedios() {
                     {med.instrucoes ? <p className="mt-2 rounded-xl bg-chrome-tint px-3 py-2 text-base font-semibold">{med.instrucoes}</p> : null}
                   </div>
                   <div className="flex shrink-0 gap-2">
-                    <button onClick={() => abrirEdicao(med)} aria-label={`Editar ${med.nome}`} className="grid size-12 place-items-center rounded-2xl bg-chrome-tint text-chrome-deep ring-1 ring-border active:scale-95">
+                    <button onClick={() => abrirEdicao(med)} aria-label={`Editar ${med.nome}`} className="grid size-12 place-items-center rounded-xl bg-chrome-tint text-chrome-deep ring-1 ring-border active:scale-95">
                       <Pencil className="size-6" />
                     </button>
                     <button onClick={() => remover.mutate(med.id)} aria-label={`Excluir ${med.nome}`} className="grid size-12 place-items-center rounded-2xl bg-coral text-coralink ring-1 ring-coralink/20 active:scale-95">
@@ -145,7 +145,7 @@ function Remedios() {
         )}
 
         {arquivados.length > 0 ? (
-          <details className="rounded-3xl bg-card p-5 ring-1 ring-border">
+          <details className="rounded-xl bg-card p-5 ring-1 ring-border">
             <summary className="cursor-pointer font-display text-lg font-semibold">Arquivados ({arquivados.length})</summary>
             <ul className="mt-3 space-y-2">{arquivados.map((med) => <li key={med.id} className="text-base font-semibold text-inksoft">{med.nome} · {med.dosagem}</li>)}</ul>
           </details>
@@ -153,7 +153,7 @@ function Remedios() {
 
         {editando ? (
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 p-4 sm:items-center">
-            <section className="w-full max-w-[460px] rounded-3xl bg-card p-5 shadow-soft ring-1 ring-border">
+            <section className="w-full max-w-[460px] rounded-xl bg-card p-5 ring-1 ring-border">
               <div className="flex items-center justify-between">
                 <h2 className="font-display text-2xl font-semibold">Editar remédio</h2>
                 <button onClick={() => setEditando(null)} aria-label="Fechar" className="grid size-10 place-items-center rounded-xl bg-chrome-tint text-chrome-deep"><X /></button>
