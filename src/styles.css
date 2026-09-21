@@ -59,6 +59,11 @@
   --color-coralink: var(--coralink);
   --color-amber: var(--amber);
   --color-amberink: var(--amberink);
+  --color-success: var(--success);
+  --color-success-tint: var(--success-tint);
+  --color-warning: var(--warning);
+  --color-warning-tint: var(--warning-tint);
+  --color-overlay: var(--overlay);
 }
 
 :root {
@@ -80,6 +85,11 @@
   --coralink: oklch(0.4829 0.1198 32.87);
   --amber: oklch(0.9661 0.04 88.2);
   --amberink: oklch(0.5425 0.0989 84.61);
+  --success: oklch(0.44 0.12 152);
+  --success-tint: oklch(0.96 0.04 152);
+  --warning: oklch(0.52 0.11 75);
+  --warning-tint: oklch(0.96 0.05 85);
+  --overlay: oklch(0.18 0.02 156 / 45%);
 
   --background: var(--canvas);
   --foreground: var(--ink);
