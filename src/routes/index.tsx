@@ -3,7 +3,17 @@ import { useEffect } from "react";
 import { Bell, MessageCircleHeart, PackageCheck, Pill, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/")({ component: Index });
+export const Route = createFileRoute("/")({
+  head: () => ({ meta: [
+    { title: "AICare — Cuidado e acompanhamento" },
+    { name: "description", content: "Organize medicamentos, registros diários e o acompanhamento familiar em um só lugar." },
+    { property: "og:title", content: "AICare — Cuidado e acompanhamento" },
+    { property: "og:description", content: "Organize medicamentos, registros diários e o acompanhamento familiar em um só lugar." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
+  component: Index,
+});
 
 function Index() {
   const navigate = useNavigate();
@@ -17,7 +27,7 @@ function Index() {
             <Bell className="size-6" strokeWidth={2.25} />
           </span>
           <div>
-            <p className="text-xs font-semibold tracking-[0.16em] text-inksoft uppercase">Lembretes</p>
+            <p className="text-xs font-semibold text-inksoft uppercase">Acompanhamento AICare</p>
             <h1 className="font-display text-2xl leading-none font-semibold">AICare</h1>
           </div>
         </div>
