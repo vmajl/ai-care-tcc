@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
+import { Button } from "@/components/ui/button";
 import { usePacienteSelecionado } from "@/hooks/usePaciente";
 import { descricaoFrequencia, type Medication, type Patient } from "@/lib/capsula";
 
@@ -13,6 +14,10 @@ export const Route = createFileRoute("/_authenticated/remedios")({
     meta: [
       { title: "Remédios cadastrados — AICare" },
       { name: "description", content: "Veja e organize todos os remédios de cada pessoa, com horários e duração." },
+      { property: "og:title", content: "Medicamentos — AICare" },
+      { property: "og:description", content: "Veja e organize medicamentos, horários e duração do tratamento." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Remedios,
@@ -103,40 +108,37 @@ function Remedios() {
     <AppShell pacientes={pacientes} pacienteId={pacienteId} onTrocarPaciente={selecionar}>
       <section className="space-y-4">
         <div className="flex items-baseline justify-between gap-3">
-          <h1 className="font-display text-3xl font-semibold">Remédios</h1>
+          <div><p className="text-sm font-bold text-inksoft">Acompanhamento AICare</p><h1 className="page-heading">Medicamentos</h1></div>
           <span className="text-base font-bold text-inksoft">{ativos.length} em uso</span>
         </div>
 
-        <Link to="/conversar" className="chrome flex items-center gap-3 rounded-xl px-5 py-4 text-on-chrome ring-1 ring-on-chrome/50 transition-transform hover:scale-[1.01] active:scale-95">
-          <MessageCircle className="size-7 shrink-0" />
-          <span className="font-display text-xl font-semibold">Adicionar conversando</span>
-        </Link>
+        <Button asChild size="lg" className="w-full"><Link to="/conversar"><MessageCircle />Registrar medicamento</Link></Button>
 
         {isLoading ? <p className="text-lg font-bold text-inksoft">Carregando…</p> : ativos.length === 0 ? (
-          <div className="rounded-xl bg-card p-6 text-center ring-1 ring-border shadow-soft">
+          <div className="surface text-center">
             <Pill className="mx-auto size-10 text-inksoft" />
-            <p className="mt-3 font-display text-xl font-semibold">Nenhum remédio ainda</p>
-            <p className="mt-1 text-base font-semibold text-inksoft">Toque em “Adicionar conversando” e conte o nome do remédio.</p>
+            <p className="mt-3 section-heading">Nenhum medicamento cadastrado</p>
+            <p className="mt-1 text-base font-semibold text-inksoft">Use “Registrar medicamento” para adicionar o primeiro.</p>
           </div>
         ) : (
-          <ul className="space-y-3">
+          <ul className="divide-y divide-border rounded-lg bg-card px-5 ring-1 ring-border">
             {ativos.map((med) => (
-              <li key={med.id} className="rounded-xl bg-card p-5 ring-1 ring-border shadow-soft">
+              <li key={med.id} className="py-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-display text-2xl leading-tight font-semibold">{med.nome}</p>
+                    <p className="section-heading">{med.nome}</p>
                     <p className="mt-1 text-lg font-bold text-chrome-deep">{med.dosagem}</p>
                     <p className="mt-1 text-base font-semibold text-inksoft">{descricaoFrequencia(med)}</p>
                     <p className="mt-1 text-base font-semibold text-inksoft">1ª dose às {med.primeiro_horario?.slice(0, 5)}</p>
-                    {med.instrucoes ? <p className="mt-2 rounded-xl bg-chrome-tint px-3 py-2 text-base font-semibold">{med.instrucoes}</p> : null}
+                    {med.instrucoes ? <p className="mt-2 border-l-2 border-primary pl-3 text-base font-semibold text-inksoft">{med.instrucoes}</p> : null}
                   </div>
                   <div className="flex shrink-0 gap-2">
-                    <button onClick={() => abrirEdicao(med)} aria-label={`Editar ${med.nome}`} className="grid size-12 place-items-center rounded-xl bg-chrome-tint text-chrome-deep ring-1 ring-border active:scale-95">
+                    <Button onClick={() => abrirEdicao(med)} aria-label={`Editar ${med.nome}`} variant="secondary" size="icon">
                       <Pencil className="size-6" />
-                    </button>
-                    <button onClick={() => remover.mutate(med.id)} aria-label={`Excluir ${med.nome}`} className="grid size-12 place-items-center rounded-2xl bg-coral text-coralink ring-1 ring-coralink/20 active:scale-95">
+                    </Button>
+                    <Button onClick={() => remover.mutate(med.id)} aria-label={`Arquivar ${med.nome}`} variant="destructive" size="icon">
                       <Trash2 className="size-6" />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </li>
@@ -145,18 +147,18 @@ function Remedios() {
         )}
 
         {arquivados.length > 0 ? (
-          <details className="rounded-xl bg-card p-5 ring-1 ring-border">
+          <details className="surface">
             <summary className="cursor-pointer font-display text-lg font-semibold">Arquivados ({arquivados.length})</summary>
             <ul className="mt-3 space-y-2">{arquivados.map((med) => <li key={med.id} className="text-base font-semibold text-inksoft">{med.nome} · {med.dosagem}</li>)}</ul>
           </details>
         ) : null}
 
         {editando ? (
-          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 p-4 sm:items-center">
-            <section className="w-full max-w-[460px] rounded-xl bg-card p-5 ring-1 ring-border">
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-overlay p-4 sm:items-center">
+            <section role="dialog" aria-modal="true" aria-labelledby="editar-remedio" className="w-full max-w-[460px] rounded-lg bg-card p-5 ring-1 ring-border">
               <div className="flex items-center justify-between">
-                <h2 className="font-display text-2xl font-semibold">Editar remédio</h2>
-                <button onClick={() => setEditando(null)} aria-label="Fechar" className="grid size-10 place-items-center rounded-xl bg-chrome-tint text-chrome-deep"><X /></button>
+                <h2 id="editar-remedio" className="section-heading">Editar medicamento</h2>
+                <Button onClick={() => setEditando(null)} aria-label="Fechar" variant="ghost" size="icon"><X /></Button>
               </div>
               <div className="mt-4 space-y-3">
                 <Campo label="Nome" value={nome} onChange={setNome} />
@@ -167,9 +169,9 @@ function Remedios() {
                 </div>
                 <Campo label="Instruções" value={instrucoes} onChange={setInstrucoes} />
               </div>
-              <button onClick={() => atualizar.mutate()} disabled={atualizar.isPending || !nome.trim() || !dosagem.trim()} className="chrome mt-4 w-full rounded-2xl py-4 font-display text-xl font-bold text-on-chrome disabled:opacity-60">
+              <Button onClick={() => atualizar.mutate()} disabled={atualizar.isPending || !nome.trim() || !dosagem.trim()} className="mt-4 w-full">
                 {atualizar.isPending ? "Salvando…" : "Salvar alterações"}
-              </button>
+              </Button>
             </section>
           </div>
         ) : null}
@@ -179,5 +181,5 @@ function Remedios() {
 }
 
 function Campo({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (value: string) => void; type?: string }) {
-  return <label className="block"><span className="mb-1 block text-sm font-bold text-inksoft">{label}</span><input type={type} value={value} onChange={(e) => onChange(e.target.value)} className="w-full rounded-2xl bg-chrome-tint px-4 py-3 text-lg font-semibold text-ink ring-1 ring-input outline-none focus:ring-2 focus:ring-ring" /></label>;
+  return <label className="block"><span className="mb-1 block text-sm font-bold text-inksoft">{label}</span><input type={type} value={value} onChange={(e) => onChange(e.target.value)} className="field-control text-lg font-semibold" /></label>;
 }
