@@ -4,10 +4,21 @@ import { Camera, ChevronLeft, ChevronRight, Clock3 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
+import { Button } from "@/components/ui/button";
 import { usePacienteSelecionado } from "@/hooks/usePaciente";
 import type { Patient } from "@/lib/capsula";
 
-export const Route = createFileRoute("/_authenticated/diario")({ component: DiarioCuidador });
+export const Route = createFileRoute("/_authenticated/diario")({
+  head: () => ({ meta: [
+    { title: "Diário de acompanhamento — AICare" },
+    { name: "description", content: "Consulte fotos e registros diários da pessoa acompanhada." },
+    { property: "og:title", content: "Diário de acompanhamento — AICare" },
+    { property: "og:description", content: "Consulte fotos e registros diários da pessoa acompanhada." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
+  component: DiarioCuidador,
+});
 
 function DiarioCuidador() {
   const { data: pacientes = [] } = useQuery({
@@ -51,20 +62,20 @@ function DiarioCalendario({ pacienteId, nomePaciente }: { pacienteId: string | n
     <section className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-base font-bold text-inksoft">Diário</p>
-          <h1 className="font-display text-4xl font-semibold">Setembro 2026</h1>
+          <p className="text-sm font-bold text-inksoft">Acompanhamento AICare</p>
+          <h1 className="page-heading">Diário · Setembro 2026</h1>
           <p className="mt-1 text-base text-inksoft">Fotos e registros diários de {nomePaciente}</p>
         </div>
-        <Camera className="size-8 text-chrome-deep" />
+        <Camera className="size-6 text-primary" />
       </div>
 
-      <div className="mt-4 flex items-center justify-between rounded-xl bg-card p-3 ring-1 ring-border">
-        <button type="button" className="rounded-xl p-2" aria-label="Mês anterior"><ChevronLeft /></button>
+      <div className="mt-4 flex items-center justify-between rounded-lg bg-card p-2 ring-1 ring-border">
+        <Button type="button" variant="ghost" size="icon" aria-label="Mês anterior"><ChevronLeft /></Button>
         <span className="font-bold">Acompanhamento diário</span>
-        <button type="button" className="rounded-xl p-2" aria-label="Próximo mês"><ChevronRight /></button>
+        <Button type="button" variant="ghost" size="icon" aria-label="Próximo mês"><ChevronRight /></Button>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 rounded-xl bg-card p-3 ring-1 ring-border">
+      <div className="grid grid-cols-7 gap-1 rounded-lg bg-card p-3 ring-1 ring-border">
         {["dom.", "seg.", "ter.", "qua.", "qui.", "sex.", "sáb."].map((d) => (
           <span key={d} className="py-2 text-center text-xs font-bold text-inksoft">{d}</span>
         ))}
@@ -79,12 +90,12 @@ function DiarioCalendario({ pacienteId, nomePaciente }: { pacienteId: string | n
               onClick={() => setDiaSelecionado(dia)}
               aria-label={temFoto ? `Dia ${dia}, com foto` : `Dia ${dia}, sem foto registrada`}
               aria-pressed={selecionado}
-              className={`min-h-20 rounded-xl p-1 text-center transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-ring ${selecionado ? "bg-chrome-tint ring-2 ring-chrome" : "hover:bg-chrome-tint/60"}`}
+              className={`min-h-16 rounded-md p-1 text-center transition-colors focus:outline-none focus:ring-2 focus:ring-ring sm:min-h-20 ${selecionado ? "bg-chrome-tint ring-2 ring-primary" : "hover:bg-chrome-tint/60"}`}
             >
               {temFoto ? (
-                <div className="overflow-hidden rounded-xl bg-chrome-tint"><img src={fotoDia17!} alt="" className="h-14 w-full object-cover" /></div>
+                <div className="overflow-hidden rounded-md bg-chrome-tint"><img src={fotoDia17!} alt="" className="h-11 w-full object-cover sm:h-14" /></div>
               ) : (
-                <div className="grid h-14 place-items-center text-base font-semibold">{dia}</div>
+                <div className="grid h-11 place-items-center text-base font-semibold sm:h-14">{dia}</div>
               )}
               <span className="mt-1 block text-[10px] font-bold text-inksoft">{dia}</span>
             </button>
@@ -92,22 +103,22 @@ function DiarioCalendario({ pacienteId, nomePaciente }: { pacienteId: string | n
         })}
       </div>
 
-      <section className="rounded-xl bg-card p-5 ring-1 ring-border">
+      <section className="surface">
         {temFotoSelecionada ? (
           <>
-            <div className="overflow-hidden rounded-2xl bg-chrome-tint"><img src={fotoDia17!} alt={`${nomePaciente} em seu registro diário de 17 de setembro de 2026`} className="max-h-80 w-full object-cover" /></div>
+            <div className="overflow-hidden rounded-lg bg-chrome-tint"><img src={fotoDia17!} alt={`${nomePaciente} em seu registro diário de 17 de setembro de 2026`} className="max-h-80 w-full object-cover" /></div>
             <div className="mt-4">
               <p className="text-sm font-bold text-inksoft">Registro diário</p>
-              <h2 className="font-display text-2xl font-semibold">17 de setembro de 2026</h2>
+              <h2 className="section-heading">17 de setembro de 2026</h2>
               <div className="mt-2 flex items-center gap-2 text-base font-semibold text-inksoft"><Clock3 className="size-5" />08:24</div>
               <p className="mt-4 text-base leading-relaxed text-inksoft">Registro fotográfico diário de {nomePaciente}. A família pode acompanhar a rotina e as atualizações compartilhadas pelo cuidador.</p>
             </div>
           </>
         ) : (
           <div className="py-8 text-center">
-            <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-chrome-tint text-chrome-deep"><Camera className="size-7" /></div>
+            <div className="mx-auto grid size-12 place-items-center rounded-lg bg-chrome-tint text-primary"><Camera className="size-6" /></div>
             <p className="mt-4 text-sm font-bold text-inksoft">Sem foto registrada</p>
-            <h2 className="mt-1 font-display text-2xl font-semibold">{diaSelecionado} de setembro de 2026</h2>
+            <h2 className="section-heading mt-1">{diaSelecionado} de setembro de 2026</h2>
             <p className="mt-2 text-base leading-relaxed text-inksoft">Não há uma foto registrada para este dia.</p>
           </div>
         )}
