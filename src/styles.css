@@ -6,7 +6,7 @@
 
 /*
  * AICare — design system
- * Estética "cromado alegre": gradientes suaves verde/menta, cartões brancos,
+ * Estética clínica e acolhedora: azul-petróleo, azul suave e superfícies claras,
  * tipografia grande e arredondada para leitura fácil por pessoas idosas.
  * Todas as cores em oklch e registradas como tokens semânticos.
  */
@@ -71,25 +71,27 @@
   --font-family-display: "Fredoka", "Quicksand", ui-rounded, sans-serif;
   --font-family-body: "Quicksand", ui-rounded, sans-serif;
 
-  --chrome-a: oklch(0.85 0.14 150);
-  --chrome-b: oklch(0.76 0.16 178);
-  --chrome-deep: oklch(0.52 0.13 156);
-  --chrome-tint: oklch(0.97 0.026 152);
+  /* Identidade AICare: azul-petróleo/teal, distinta de apps de mensagens. */
+  --chrome-a: oklch(0.82 0.09 192);
+  --chrome-b: oklch(0.72 0.11 205);
+  --chrome-deep: oklch(0.48 0.10 195);
+  --chrome-tint: oklch(0.965 0.025 195);
   --on-chrome: oklch(1 0 0);
-  --canvas: oklch(0.965 0.022 152);
-  --ink: oklch(0.29 0.05 156);
-  --inksoft: oklch(0.52 0.045 156);
-  --mint: oklch(0.95 0.05 150);
-  --mintink: oklch(0.42 0.12 156);
+  --canvas: oklch(0.975 0.012 195);
+  --ink: oklch(0.28 0.035 215);
+  --inksoft: oklch(0.50 0.035 210);
+  --mint: oklch(0.94 0.035 190);
+  --mintink: oklch(0.39 0.085 195);
   --coral: oklch(0.7564 0.1475 33.64);
   --coralink: oklch(0.4829 0.1198 32.87);
   --amber: oklch(0.9661 0.04 88.2);
   --amberink: oklch(0.5425 0.0989 84.61);
-  --success: oklch(0.44 0.12 152);
-  --success-tint: oklch(0.96 0.04 152);
+  /* Verde reservado para estados de sucesso, não para a marca. */
+  --success: oklch(0.48 0.13 145);
+  --success-tint: oklch(0.96 0.045 145);
   --warning: oklch(0.52 0.11 75);
   --warning-tint: oklch(0.96 0.05 85);
-  --overlay: oklch(0.18 0.02 156 / 45%);
+  --overlay: oklch(0.18 0.025 210 / 45%);
 
   --background: var(--canvas);
   --foreground: var(--ink);
@@ -107,17 +109,17 @@
   --accent-foreground: var(--mintink);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.29 0.05 156 / 14%);
-  --input: oklch(0.29 0.05 156 / 20%);
+  --border: oklch(0.28 0.035 215 / 14%);
+  --input: oklch(0.28 0.035 215 / 20%);
   --ring: var(--chrome-deep);
 
   --gradient-chrome: linear-gradient(135deg, var(--chrome-a), var(--chrome-b));
   --gradient-chrome-deep: linear-gradient(
     135deg,
-    oklch(0.60 0.12 152),
-    oklch(0.55 0.14 178)
+    oklch(0.57 0.10 192),
+    oklch(0.52 0.11 210)
   );
-  --shadow-soft: 0 4px 14px -8px oklch(0.29 0.05 156 / 22%);
+  --shadow-soft: 0 4px 14px -8px oklch(0.25 0.03 210 / 16%);
 }
 
 @utility chrome {
