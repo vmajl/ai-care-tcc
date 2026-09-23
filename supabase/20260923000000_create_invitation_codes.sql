@@ -78,8 +78,18 @@ BEGIN
     );
   END LOOP;
 
-  INSERT INTO public.patient_invites (patient_id, code, ativo)
-  VALUES (_patient_id, v_code, true);
+  INSERT INTO public.patient_invites (
+    patient_id,
+    owner_id,
+    code,
+    ativo
+  )
+  VALUES (
+    _patient_id,
+    v_owner_id,
+    v_code,
+    true
+  );
 
   RETURN v_code;
 END;
