@@ -107,12 +107,16 @@ function Remedios() {
   return (
     <AppShell pacientes={pacientes} pacienteId={pacienteId} onTrocarPaciente={selecionar}>
       <section className="space-y-4">
-        <div className="flex items-baseline justify-between gap-3">
-          <div><p className="text-sm font-bold text-inksoft">Acompanhamento AICare</p><h1 className="page-heading">Medicamentos</h1></div>
-          <span className="text-base font-bold text-inksoft">{ativos.length} em uso</span>
+        <div>
+          <p className="text-sm font-bold text-inksoft">Acompanhamento AICare</p>
+          <div className="mt-1 flex items-end justify-between gap-3">
+            <h1 className="page-heading">Medicamentos</h1>
+            <span className="text-sm font-bold text-inksoft">{ativos.length} em uso</span>
+          </div>
+          <p className="mt-2 text-sm text-inksoft">Horários e tratamentos de {pacientes.find((p) => p.id === pacienteId)?.nome ?? "quem você cuida"}.</p>
         </div>
 
-        <Button asChild size="lg" className="w-full"><Link to="/conversar"><MessageCircle />Registrar medicamento</Link></Button>
+        <Button asChild size="lg" className="w-full"><Link to="/conversar"><MessageCircle />Adicionar medicamento</Link></Button>
 
         {isLoading ? <p className="text-lg font-bold text-inksoft">Carregando…</p> : ativos.length === 0 ? (
           <div className="surface text-center">
@@ -127,12 +131,12 @@ function Remedios() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="section-heading">{med.nome}</p>
-                    <p className="mt-1 text-lg font-bold text-chrome-deep">{med.dosagem}</p>
-                    <p className="mt-1 text-base font-semibold text-inksoft">{descricaoFrequencia(med)}</p>
-                    <p className="mt-1 text-base font-semibold text-inksoft">1ª dose às {med.primeiro_horario?.slice(0, 5)}</p>
+                    <p className="mt-1 text-base font-semibold text-primary">{med.dosagem}</p>
+                    <p className="mt-1 text-sm text-inksoft">{descricaoFrequencia(med)}</p>
+                    <p className="mt-1 text-sm text-inksoft">Primeira dose às {med.primeiro_horario?.slice(0, 5)}</p>
                     {med.instrucoes ? <p className="mt-2 border-l-2 border-primary pl-3 text-base font-semibold text-inksoft">{med.instrucoes}</p> : null}
                   </div>
-                  <div className="flex shrink-0 gap-2">
+                  <div className="flex shrink-0 gap-1">
                     <Button onClick={() => abrirEdicao(med)} aria-label={`Editar ${med.nome}`} variant="secondary" size="icon">
                       <Pencil className="size-6" />
                     </Button>
