@@ -2,9 +2,9 @@
 
 - [x] Padronizar cabeçalhos e navegação compartilhada
 - [x] Padronizar telas do convidado
-- [ ] Padronizar home do cuidador
-- [ ] Padronizar medicamentos e modal
-- [ ] Padronizar diário
-- [ ] Padronizar pessoas
-- [ ] Padronizar assistente
+- [x] Padronizar home do cuidador
+- [x] Padronizar medicamentos e modal
+- [x] Padronizar diário
+- [x] Padronizar pessoas
+- [x] Padronizar assistente
 - [ ] Validar home, medicamentos, diário e pessoas em celular e desktop
