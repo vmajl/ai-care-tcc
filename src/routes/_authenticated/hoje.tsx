@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Camera, Check, MessageCircleHeart, Plus } from "lucide-react";
+import { Camera, Check, MessageCircleHeart, Pill, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -74,16 +74,69 @@ function Hoje() {
   const marcar = useMutation({
     mutationFn: async (dose: Dose) => {
       const { data: sessao } = await supabase.auth.getUser();
-      const { error } = await supabase.from("dose_logs").insert({ owner_id: sessao.user!.id, medication_id: dose.medication.id, patient_id: dose.medication.patient_id, horario_previsto: dose.when.toISOString() });
-      if (error) throw error;
+      if (!sessao.user) throw new Error("Sessão não encontrada.");
+
+      const quantidadePorDose = obterQuantidadePorDose(dose.medication.dosagem);
+      const estoqueAtual = Number(dose.medication.quantidade_estoque ?? 0);
+
+      if (estoqueAtual < quantidadePorDose) {
+        throw new Error("ESTOQUE_INSUFICIENTE");
+      }
+
+      const { error: logError } = await supabase.from("dose_logs").insert({
+        owner_id: sessao.user.id,
+        medication_id: dose.medication.id,
+        patient_id: dose.medication.patient_id,
+        horario_previsto: dose.when.toISOString(),
+      });
+      if (logError) throw logError;
+
+      const { error: estoqueError } = await supabase
+        .from("medications")
+        .update({ quantidade_estoque: estoqueAtual - quantidadePorDose })
+        .eq("id", dose.medication.id);
+
+      if (estoqueError) {
+        await supabase.from("dose_logs").delete().eq("medication_id", dose.medication.id).eq("horario_previsto", dose.when.toISOString());
+        throw estoqueError;
+      }
     },
-    onSuccess: () => { toast.success("Anotado! Dose registrada."); queryClient.invalidateQueries({ queryKey: ["doses"] }); },
-    onError: () => toast.error("Não conseguimos registrar. Tente de novo."),
+    onSuccess: () => {
+      toast.success("Anotado! Dose registrada e estoque atualizado.");
+      queryClient.invalidateQueries({ queryKey: ["doses"] });
+      queryClient.invalidateQueries({ queryKey: ["medicamentos"] });
+    },
+    onError: (error) => {
+      toast.error(error.message === "ESTOQUE_INSUFICIENTE" ? "O estoque não é suficiente para registrar essa dose." : "Não conseguimos registrar. Tente de novo.");
+    },
   });
+
   const desmarcar = useMutation({
-    mutationFn: async (dose: Dose) => { const { error } = await supabase.from("dose_logs").delete().eq("id", dose.log!.id); if (error) throw error; },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["doses"] }),
+    mutationFn: async (dose: Dose) => {
+      const quantidadePorDose = obterQuantidadePorDose(dose.medication.dosagem);
+      const estoqueAtual = Number(dose.medication.quantidade_estoque ?? 0);
+      const { error } = await supabase.from("dose_logs").delete().eq("id", dose.log!.id);
+      if (error) throw error;
+
+      const { error: estoqueError } = await supabase
+        .from("medications")
+        .update({ quantidade_estoque: estoqueAtual + quantidadePorDose })
+        .eq("id", dose.medication.id);
+
+      if (estoqueError) throw estoqueError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["doses"] });
+      queryClient.invalidateQueries({ queryKey: ["medicamentos"] });
+    },
+    onError: () => toast.error("Não conseguimos desfazer o registro."),
   });
+
+  function obterQuantidadePorDose(dosagem: string) {
+    const match = dosagem.match(/(?:^|\s)(\d+(?:[.,]\d+)?)\s*(?:comprimidos?|cápsulas?|capsulas?|doses?|gotas?|ampolas?|unidades?)/i);
+    if (!match) return 1;
+    return Math.max(0.01, Number(match[1].replace(",", ".")));
+  }
 
   function selecionarFoto(event: React.ChangeEvent<HTMLInputElement>) {
     const arquivo = event.target.files?.[0];
@@ -99,6 +152,32 @@ function Hoje() {
   return <AppShell pacientes={pacientes} pacienteId={pacienteId} onTrocarPaciente={selecionar}>
     <div><p className="text-sm font-bold text-inksoft">Acompanhamento AICare</p><h1 className="page-heading">Hoje · {paciente?.nome}</h1></div>
     {proxima ? <section className="surface border-l-4 border-primary"><div className="flex items-start justify-between gap-4"><div><p className="text-sm font-bold uppercase tracking-wide text-primary">{proxima.status === "atrasado" ? "Dose atrasada" : "Próxima dose"}</p><h2 className="mt-1 font-display text-2xl font-semibold">{proxima.medication.nome}</h2><p className="mt-1 text-base text-inksoft">{proxima.medication.dosagem}{proxima.medication.instrucoes ? ` · ${proxima.medication.instrucoes}` : ""}</p></div><span className="shrink-0 rounded-md bg-chrome-tint px-3 py-1.5 font-display text-lg font-semibold text-primary">{proxima.hora}</span></div><Button onClick={() => marcar.mutate(proxima)} disabled={marcar.isPending} size="lg" className="mt-4 w-full">{marcar.isPending ? "Registrando…" : "Registrar como tomada"}</Button></section> : <section className="surface"><p className="section-heading">{meds.length === 0 ? "Nenhum medicamento cadastrado" : "Doses concluídas hoje"}</p><p className="mt-2 text-inksoft">{meds.length === 0 ? "Use o assistente para cadastrar o primeiro medicamento." : "Todas as doses previstas para hoje foram registradas."}</p></section>}
+
+    {meds.length > 0 ? (
+      <section className="surface">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="section-heading">Estoque de medicamentos</h2>
+            <p className="mt-1 text-sm font-semibold text-inksoft">Atualizado automaticamente conforme as doses são registradas.</p>
+          </div>
+          <Pill className="size-5 text-primary" />
+        </div>
+        <div className="mt-4 divide-y divide-border rounded-lg bg-card ring-1 ring-border">
+          {meds.map((med) => (
+            <div key={med.id} className="flex items-center justify-between gap-4 px-4 py-3">
+              <div className="min-w-0">
+                <p className="font-display text-lg font-semibold truncate">{med.nome}</p>
+                <p className="text-sm text-inksoft">{med.dosagem}</p>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="font-display text-xl font-semibold text-primary">{Number(med.quantidade_estoque ?? 0).toLocaleString("pt-BR")}</p>
+                <p className="text-xs font-bold uppercase tracking-wide text-inksoft">{med.unidade_estoque || "unidade"}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    ) : null}
 
     <section className="surface"><div className="flex items-start gap-3"><Camera className="mt-0.5 size-5 shrink-0 text-primary" /><div><h2 className="section-heading">Registro de hoje</h2><p className="text-sm font-semibold text-inksoft">Adicione uma foto de {paciente?.nome ?? "quem você cuida"} ao diário compartilhado.</p></div></div>{fotoHoje ? <img src={fotoHoje} alt="Registro fotográfico de hoje" className="mt-4 h-56 w-full rounded-lg object-cover" /> : null}<label className="mt-4 flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-5 font-display text-base font-bold text-primary-foreground focus-within:ring-2 focus-within:ring-ring"><Camera className="size-5" />{fotoHoje ? "Trocar foto" : "Registrar foto"}<input type="file" accept="image/*" capture="environment" className="sr-only" onChange={selecionarFoto} /></label></section>
 
