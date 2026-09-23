@@ -45,10 +45,13 @@ export function GuestShell({ children }: Props) {
 
         {children}
 
-        <nav aria-label="Navegação principal" className="fixed inset-x-0 bottom-0 z-40 mx-auto grid max-w-[720px] grid-cols-4 border-t border-border bg-card px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 lg:static lg:rounded-lg lg:border lg:p-2">
+        <nav
+          aria-label="Navegação principal"
+          className="fixed inset-x-0 bottom-0 z-40 mx-auto grid max-w-[720px] grid-cols-4 border-t border-border bg-card px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 lg:static lg:rounded-lg lg:border lg:p-2"
+        >
           <GuestNavItem to="/convidado" label="Início" icon={<Home className="size-6" />} active={path === "/convidado"} />
           <GuestNavItem to="/convidado-diario" label="Diário" icon={<CalendarDays className="size-6" />} active={path === "/convidado-diario"} />
-          <GuestNavItem to="/convidado-medicamentos" label="Remédios" icon={<Pill className="size-6" />} active={path === "/convidado-medicamentos"} />
+          <GuestNavItem to="/convidado-medicamentos" label="Medicamentos" icon={<Pill className="size-6" />} active={path === "/convidado-medicamentos"} />
           <GuestNavItem to="/convidado-notificacoes" label="Avisos" icon={<Bell className="size-6" />} active={path === "/convidado-notificacoes"} />
         </nav>
       </main>
