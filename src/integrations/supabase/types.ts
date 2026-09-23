@@ -84,6 +84,8 @@ export type Database = {
           owner_id: string
           patient_id: string
           primeiro_horario?: string
+          quantidade_estoque?: number
+          unidade_estoque?: string
         }
         Update: {
           ativo?: boolean
@@ -98,6 +100,8 @@ export type Database = {
           owner_id?: string
           patient_id?: string
           primeiro_horario?: string
+          quantidade_estoque?: number
+          unidade_estoque?: string
         }
         Relationships: [
           {
