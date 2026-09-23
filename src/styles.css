@@ -72,16 +72,16 @@
   --font-family-body: "Quicksand", ui-rounded, sans-serif;
 
   /* Identidade AICare: azul-petróleo/teal, distinta de apps de mensagens. */
-  --chrome-a: oklch(0.82 0.09 192);
-  --chrome-b: oklch(0.72 0.11 205);
-  --chrome-deep: oklch(0.48 0.10 195);
-  --chrome-tint: oklch(0.965 0.025 195);
+  --chrome-a: #7DC8DF;
+  --chrome-b: #65B5D0;
+  --chrome-deep: #4FA7C2;
+  --chrome-tint: #EAF7FB;
   --on-chrome: oklch(1 0 0);
-  --canvas: oklch(0.975 0.012 195);
+  --canvas: #F6FBFD;
   --ink: oklch(0.28 0.035 215);
   --inksoft: oklch(0.50 0.035 210);
-  --mint: oklch(0.94 0.035 190);
-  --mintink: oklch(0.39 0.085 195);
+  --mint: #E3F5FA;
+  --mintink: #2F829B;
   --coral: oklch(0.7564 0.1475 33.64);
   --coralink: oklch(0.4829 0.1198 32.87);
   --amber: oklch(0.9661 0.04 88.2);
