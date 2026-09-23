@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Bell, Copy, LogOut, Plus, Share2, UserRound, Users } from "lucide-react";
+import { Bell, Copy, LogOut, Plus, Share2, Trash2, UserRound, Users } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
@@ -36,6 +36,7 @@ function Perfil() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [nome, setNome] = useState("");
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState<Patient | null>(null);
 
   const { data: usuarioId } = useQuery({
     queryKey: ["usuario-id"],
@@ -138,6 +139,21 @@ function Perfil() {
     else toast("Este navegador não envia avisos.");
   }
 
+  const excluir = useMutation({
+    mutationFn: async (pessoa: Patient) => {
+      const { data: sessao } = await supabase.auth.getUser();
+      if (!sessao.user || pessoa.owner_id !== sessao.user.id) throw new Error("Não autorizado");
+      const { error } = await supabase.from("patients").delete().eq("id", pessoa.id).eq("owner_id", sessao.user.id);
+      if (error) throw error;
+    },
+    onSuccess: (_, pessoa) => {
+      setConfirmandoExclusao(null);
+      queryClient.invalidateQueries({ queryKey: ["pacientes"] });
+      toast.success(pessoa.nome + " foi excluída da sua área.");
+    },
+    onError: () => toast.error("Não conseguimos excluir essa pessoa."),
+  });
+
   async function sair() {
     await supabase.auth.signOut();
     navigate({ to: "/auth" });
@@ -150,25 +166,12 @@ function Perfil() {
 
         <ul className="space-y-3">
           {pacientes.map((p) => (
-            <li key={p.id}>
-              <button
-                onClick={() => selecionar(p.id)}
-                className={
-                  p.id === pacienteId
-                    ? "flex min-h-20 w-full items-center gap-4 rounded-lg bg-primary p-4 text-primary-foreground ring-1 ring-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    : "flex min-h-20 w-full items-center gap-4 rounded-lg bg-card p-4 ring-1 ring-border transition-colors hover:bg-chrome-tint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                }
-              >
-                <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-chrome-tint">
-                  <span className="font-display text-lg font-bold text-chrome-deep">{iniciais(p.nome)}</span>
-                </span>
-                <span className="text-left">
-                  <span className="block font-display text-xl font-semibold">{p.nome}</span>
-                  <span className="block text-base font-semibold opacity-80">
-                    {p.id === pacienteId ? "Em uso agora" : "Toque para usar"}
-                  </span>
-                </span>
+            <li key={p.id} className="flex items-stretch gap-2">
+              <button onClick={() => selecionar(p.id)} className={p.id === pacienteId ? "flex min-h-20 min-w-0 flex-1 items-center gap-4 rounded-lg bg-primary p-4 text-primary-foreground ring-1 ring-primary" : "flex min-h-20 min-w-0 flex-1 items-center gap-4 rounded-lg bg-card p-4 ring-1 ring-border transition-colors hover:bg-chrome-tint"}>
+                <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-chrome-tint"><span className="font-display text-lg font-bold text-chrome-deep">{iniciais(p.nome)}</span></span>
+                <span className="min-w-0 text-left"><span className="block truncate font-display text-xl font-semibold">{p.nome}</span><span className="block text-base font-semibold opacity-80">{p.id === pacienteId ? "Em uso agora" : "Toque para usar"}</span></span>
               </button>
+              <Button type="button" variant="outline" size="icon" className="self-center shrink-0" aria-label={"Excluir " + p.nome} onClick={() => setConfirmandoExclusao(p)}><Trash2 className="size-5" /></Button>
             </li>
           ))}
         </ul>
@@ -211,6 +214,7 @@ function Perfil() {
         </button>
 
         <Button onClick={sair} variant="outline" className="w-full"><LogOut />Sair da conta</Button>
+        {confirmandoExclusao ? <div className="fixed inset-0 z-50 flex items-end justify-center bg-overlay p-4 sm:items-center"><section role="dialog" aria-modal="true" className="w-full max-w-[460px] rounded-lg bg-card p-5 ring-1 ring-border"><h2 className="section-heading">Excluir pessoa</h2><p className="mt-2 text-sm leading-relaxed text-inksoft">Você está encerrando o acompanhamento de <strong>{confirmandoExclusao.nome}</strong>. Os dados dessa pessoa serão removidos da sua área de cuidador.</p><p className="mt-2 text-sm font-semibold text-inksoft">Essa ação não poderá ser desfeita.</p><div className="mt-5 grid grid-cols-2 gap-3"><Button variant="secondary" onClick={() => setConfirmandoExclusao(null)}>Cancelar</Button><Button variant="destructive" onClick={() => excluir.mutate(confirmandoExclusao)} disabled={excluir.isPending}>{excluir.isPending ? "Excluindo…" : "Excluir pessoa"}</Button></div></section></div> : null}
       </section>
     </AppShell>
   );
