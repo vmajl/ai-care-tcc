@@ -61,6 +61,18 @@ function Perfil() {
   const paciente = pacientes.find((p) => p.id === pacienteId);
   const souDono = !!paciente && !!usuarioId && paciente.owner_id === usuarioId;
 
+  const { data: codigo } = useQuery({
+    queryKey: ["codigo-convite", pacienteId],
+    enabled: !!pacienteId && souDono,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("gerar_codigo_convite", {
+        _patient_id: pacienteId!,
+      });
+      if (error) throw error;
+      return data as string;
+    },
+  });
+
   const adicionar = useMutation({
     mutationFn: async (novoNome: string) => {
       const { data: sessao } = await supabase.auth.getUser();
