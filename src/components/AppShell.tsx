@@ -34,41 +34,34 @@ export function AppShell({ children, pacientes = [], pacienteId, onTrocarPacient
             </span>
           </Link>
 
-          <div className="flex items-center gap-2">
-            <Link
-              to="/convidado-notificacoes"
-              aria-label="Notificações"
-              className="grid size-11 place-items-center rounded-lg bg-card text-chrome-deep ring-1 ring-border transition-colors hover:bg-chrome-tint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <Bell className="size-5" />
-            </Link>
-
-            {paciente ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger className="flex min-h-11 items-center gap-2 rounded-lg bg-primary py-1 pr-1 pl-3 ring-1 ring-primary">
-                  <span className="text-base font-bold text-on-chrome">{paciente.nome.split(" ")[0]}</span>
-                  <span className="grid size-9 place-items-center rounded-full bg-chrome-tint">
-                    <span className="text-sm font-bold text-primary">{iniciais(paciente.nome)}</span>
-                  </span>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-52 rounded-lg p-2">
-                  {pacientes.map((p) => (
-                    <DropdownMenuItem key={p.id} onClick={() => onTrocarPaciente?.(p.id)} className="rounded-md py-3 text-lg font-semibold">
-                      {p.nome}
-                    </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuItem asChild className="rounded-md py-3 text-lg font-semibold">
-                    <Link to="/perfil">Gerenciar pessoas</Link>
+          {paciente ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex min-h-11 items-center gap-2 rounded-lg bg-primary py-1 pr-1 pl-3 ring-1 ring-primary">
+                <span className="text-base font-bold text-on-chrome">{paciente.nome.split(" ")[0]}</span>
+                <span className="grid size-9 place-items-center rounded-full bg-chrome-tint">
+                  <span className="text-sm font-bold text-primary">{iniciais(paciente.nome)}</span>
+                </span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-52 rounded-lg p-2">
+                {pacientes.map((p) => (
+                  <DropdownMenuItem key={p.id} onClick={() => onTrocarPaciente?.(p.id)} className="rounded-md py-3 text-lg font-semibold">
+                    {p.nome}
                   </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : null}
-          </div>
+                ))}
+                <DropdownMenuItem asChild className="rounded-md py-3 text-lg font-semibold">
+                  <Link to="/perfil">Gerenciar pessoas</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : null}
         </header>
 
         {children}
 
-        <nav aria-label="Navegação principal" className="fixed inset-x-0 bottom-0 z-40 mx-auto grid max-w-[720px] grid-cols-4 border-t border-border bg-card px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 lg:static lg:rounded-lg lg:border lg:p-2">
+        <nav
+          aria-label="Navegação principal"
+          className="fixed inset-x-0 bottom-0 z-40 mx-auto grid max-w-[720px] grid-cols-4 border-t border-border bg-card px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 lg:static lg:rounded-lg lg:border lg:p-2"
+        >
           <NavItem to="/hoje" label="Início" icon={<Clock className="size-7" />} />
           <NavItem to="/diario" label="Diário" icon={<CalendarDays className="size-7" />} />
           <NavItem to="/remedios" label="Medicamentos" icon={<Pill className="size-7" />} />
