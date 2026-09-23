@@ -70,12 +70,30 @@ function Perfil() {
     enabled: !!pacienteId && souDono,
     retry: false,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("gerar_codigo_convite", {
-        _patient_id: pacienteId!,
-      });
-      if (error) throw error;
-      if (!data) throw new Error("A função não retornou um código.");
-      return String(data);
+      // Primeiro procura o código já existente. Isso evita gerar um novo
+      // código toda vez que a tela for aberta ou atualizada.
+      const { data: existente, error: buscaError } = await supabase
+        .from("patient_invites")
+        .select("code")
+        .eq("patient_id", pacienteId!)
+        .eq("owner_id", usuarioId!)
+        .eq("ativo", true)
+        .order("criado_em", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (buscaError) throw buscaError;
+      if (existente?.code) return existente.code;
+
+      // Só gera um código quando este paciente ainda não possui um.
+      const { data: novoCodigo, error: gerarError } = await supabase.rpc(
+        "gerar_codigo_convite",
+        { _patient_id: pacienteId! },
+      );
+
+      if (gerarError) throw gerarError;
+      if (!novoCodigo) throw new Error("A função não retornou um código.");
+      return String(novoCodigo);
     },
   });
 
