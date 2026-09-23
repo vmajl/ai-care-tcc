@@ -96,23 +96,41 @@ function Perfil() {
   async function compartilhar() {
     if (!codigo || !paciente) return;
     const texto = `Use o código ${codigo} no aplicativo AICare para acompanhar os remédios de ${paciente.nome}.`;
-    if (typeof navigator !== "undefined" && navigator.share) {
+
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
       try {
-        await navigator.share({ text: texto });
+        await navigator.share({ title: "Convite AICare", text: texto });
         return;
       } catch {
-        /* usuário cancelou */
+        // Se o compartilhamento for cancelado ou indisponível, usa a cópia como fallback.
       }
     }
+
     await copiar(texto);
   }
 
   async function copiar(texto: string) {
     try {
-      await navigator.clipboard.writeText(texto);
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(texto);
+        toast.success("Copiado!");
+        return;
+      }
+
+      const area = document.createElement("textarea");
+      area.value = texto;
+      area.setAttribute("readonly", "");
+      area.style.position = "fixed";
+      area.style.opacity = "0";
+      document.body.appendChild(area);
+      area.select();
+      const copiou = document.execCommand("copy");
+      area.remove();
+
+      if (!copiou) throw new Error("COPY_FAILED");
       toast.success("Copiado!");
     } catch {
-      toast("Copie o código manualmente.");
+      toast.error("Não foi possível copiar automaticamente. Selecione e copie o código manualmente.");
     }
   }
 
