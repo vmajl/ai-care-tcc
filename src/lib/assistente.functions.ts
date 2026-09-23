@@ -194,7 +194,9 @@ function respostaLocal(mensagens: Array<{ role: "user" | "assistant"; content: s
   const horarioMatch =
     texto.match(/(?:primeira dose|primeiro horário|horário|às|as)\D{0,20}(\d{1,2})(?::|h)(\d{2})?/i) ||
     ultimo.match(/\b(\d{1,2})(?::|h)(\d{2})?\b/i);
-  const estoqueMatch = texto.match(/(?:tenho|possuo|estoque|em posse|restam?|restante)\D{0,15}(\d+(?:[.,]\d+)?)\s*(comprimidos?|cápsulas?|capsulas?|frascos?|ml|mL|gotas?|doses?|ampolas?|unidades?)/i);
+  const estoqueMatch =
+    texto.match(/(?:tenho|possuo|estoque|em posse|restam?|restante)\D{0,15}(\d+(?:[.,]\d+)?)\s*(comprimidos?|cápsulas?|capsulas?|frascos?|ml|mL|gotas?|doses?|ampolas?|unidades?)/i) ||
+    ultimo.match(/\b(\d+(?:[.,]\d+)?)\s*(comprimidos?|cápsulas?|capsulas?|frascos?|ml|mL|gotas?|doses?|ampolas?|unidades?)\b/i);
 
   const nome = nomeMatch?.[1]?.trim() || "";
   const dosagem = dosagemMatch ? `${dosagemMatch[1]} ${dosagemMatch[2]}` : "";
@@ -221,7 +223,7 @@ function respostaLocal(mensagens: Array<{ role: "user" | "assistant"; content: s
 
   if (!estoqueMatch) {
     return {
-      resposta: "Certo. Agora me diga quanto você tem desse medicamento em estoque e a unidade. Ex.: 30 comprimidos, 2 frascos ou 60 mL.",
+      resposta: "Qual é a quantidade que você tem em estoque e qual é a unidade? Ex.: 30 comprimidos, 2 frascos ou 60 mL.",
       sugestao: null,
     };
   }
