@@ -12,9 +12,6 @@ CREATE INDEX IF NOT EXISTS patient_invites_patient_idx ON public.patient_invites
 CREATE INDEX IF NOT EXISTS patient_invites_code_idx ON public.patient_invites(code);
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.patient_invites TO authenticated;
-GRANT EXECUTE ON FUNCTION public.gerar_codigo_convite(UUID) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.validar_codigo_convite(TEXT) TO anon, authenticated;
-
 ALTER TABLE public.patient_invites ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "own patient invites select" ON public.patient_invites;
@@ -75,7 +72,7 @@ BEGIN
     AND ativo = true;
 
   LOOP
-    v_code := 'AIC-' || upper(substr(encode(gen_random_bytes(5), 'hex'), 1, 7));
+    v_code := 'AIC-' || upper(substr(md5(random()::text || clock_timestamp()::text || _patient_id::text), 1, 7));
     EXIT WHEN NOT EXISTS (
       SELECT 1 FROM public.patient_invites WHERE code = v_code
     );
@@ -87,6 +84,8 @@ BEGIN
   RETURN v_code;
 END;
 $$;
+
+GRANT EXECUTE ON FUNCTION public.gerar_codigo_convite(UUID) TO authenticated;
 
 -- Valida o código sem exigir login do familiar.
 CREATE OR REPLACE FUNCTION public.validar_codigo_convite(_code TEXT)
@@ -103,3 +102,5 @@ AS $$
     AND (i.expira_em IS NULL OR i.expira_em > now())
   LIMIT 1;
 $$;
+
+GRANT EXECUTE ON FUNCTION public.validar_codigo_convite(TEXT) TO anon, authenticated;
