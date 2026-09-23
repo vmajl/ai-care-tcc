@@ -76,16 +76,33 @@ function Remedios() {
   const atualizar = useMutation({
     mutationFn: async () => {
       if (!editando) return;
-      const { error } = await supabase.from("medications").update({
-        nome: nome.trim(),
-        dosagem: dosagem.trim(),
-        primeiro_horario: horario,
-        intervalo_horas: Number(intervalo),
-        instrucoes: instrucoes.trim() || null,
-        quantidade_estoque: Math.max(0, Number(quantidadeEstoque.replace(",", ".")) || 0),
-        unidade_estoque: unidadeEstoque.trim() || "unidade",
-      }).eq("id", editando.id);
-      if (error) throw error;
+      const { data: sessao } = await supabase.auth.getUser();
+      if (!sessao.user) throw new Error("Sessão não encontrada.");
+
+      const quantidade = Number(quantidadeEstoque.replace(",", "."));
+      if (!Number.isFinite(quantidade) || quantidade < 0) {
+        throw new Error("ESTOQUE_INVALIDO");
+      }
+
+      const { data: atualizado, error } = await supabase
+        .from("medications")
+        .update({
+          nome: nome.trim(),
+          dosagem: dosagem.trim(),
+          primeiro_horario: horario,
+          intervalo_horas: Number(intervalo),
+          instrucoes: instrucoes.trim() || null,
+          quantidade_estoque: quantidade,
+          unidade_estoque: unidadeEstoque.trim() || "unidade",
+        })
+        .eq("id", editando.id)
+        .eq("owner_id", sessao.user.id)
+        .select("id, quantidade_estoque, unidade_estoque")
+        .single();
+
+      if (error || !atualizado) {
+        throw error ?? new Error("ATUALIZACAO_NAO_CONFIRMADA");
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["medicamentos"] });
@@ -93,7 +110,11 @@ function Remedios() {
       setEditando(null);
       toast.success("Remédio atualizado.");
     },
-    onError: () => toast.error("Não conseguimos atualizar o remédio."),
+    onError: (error) => toast.error(
+      error.message === "ESTOQUE_INVALIDO"
+        ? "Informe uma quantidade de estoque válida."
+        : "Não conseguimos atualizar o remédio. Verifique se o estoque foi salvo no banco de dados."
+    ),
   });
 
   function abrirEdicao(med: Medication) {
