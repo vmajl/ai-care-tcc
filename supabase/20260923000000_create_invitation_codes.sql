@@ -47,7 +47,7 @@ CREATE POLICY "own patient invites update"
     )
   );
 
--- Gera um código curto, legível e único. Um novo código invalida o anterior do paciente.
+-- Gera um código curto, legível e único. Cada paciente mantém sempre o mesmo código ativo.
 CREATE OR REPLACE FUNCTION public.gerar_codigo_convite(_patient_id UUID)
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -58,7 +58,8 @@ DECLARE
   v_owner_id UUID;
   v_code TEXT;
 BEGIN
-  SELECT owner_id INTO v_owner_id
+  SELECT owner_id
+  INTO v_owner_id
   FROM public.patients
   WHERE id = _patient_id;
 
@@ -66,15 +67,34 @@ BEGIN
     RAISE EXCEPTION 'Não autorizado';
   END IF;
 
-  UPDATE public.patient_invites
-  SET ativo = false
+  -- Se este paciente já possui um código ativo, reutiliza o mesmo.
+  SELECT code
+  INTO v_code
+  FROM public.patient_invites
   WHERE patient_id = _patient_id
-    AND ativo = true;
+    AND ativo = true
+  ORDER BY criado_em ASC
+  LIMIT 1;
 
+  IF v_code IS NOT NULL THEN
+    RETURN v_code;
+  END IF;
+
+  -- Caso ainda não exista código, cria um novo.
   LOOP
-    v_code := 'AIC-' || upper(substr(md5(random()::text || clock_timestamp()::text || _patient_id::text), 1, 7));
+    v_code := 'AIC-' ||
+      upper(
+        substr(
+          md5(random()::text || clock_timestamp()::text || _patient_id::text),
+          1,
+          7
+        )
+      );
+
     EXIT WHEN NOT EXISTS (
-      SELECT 1 FROM public.patient_invites WHERE code = v_code
+      SELECT 1
+      FROM public.patient_invites
+      WHERE code = v_code
     );
   END LOOP;
 
