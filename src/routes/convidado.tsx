@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Bell, Camera, Pill } from "lucide-react";
 import { GuestShell } from "@/components/GuestShell";
 
@@ -15,6 +16,12 @@ export const Route = createFileRoute("/convidado")({
 });
 
 function ConvidadoHome() {
+  const [nomePaciente, setNomePaciente] = useState<string | null>(null);
+
+  useEffect(() => {
+    setNomePaciente(localStorage.getItem("aicare_nome_paciente_convidado"));
+  }, []);
+
   return <GuestShell><section className="space-y-6">
     <div>
       <p className="text-sm font-bold text-inksoft">Acompanhamento AICare</p>
@@ -26,9 +33,17 @@ function ConvidadoHome() {
       <div className="flex items-start gap-3">
         <Bell className="mt-0.5 size-5 shrink-0 text-primary" />
         <div>
-          <p className="text-sm font-bold uppercase tracking-wide text-primary">Aguardando compartilhamento</p>
-          <h2 className="mt-1 section-heading">Nenhum paciente vinculado</h2>
-          <p className="mt-2 text-sm leading-relaxed text-inksoft">Quando o cuidador compartilhar um paciente, os registros aparecerão automaticamente nesta área.</p>
+          <p className="text-sm font-bold uppercase tracking-wide text-primary">
+            {nomePaciente ? "Paciente vinculado" : "Aguardando compartilhamento"}
+          </p>
+          <h2 className="mt-1 section-heading">
+            {nomePaciente ? nomePaciente : "Nenhum paciente vinculado"}
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-inksoft">
+            {nomePaciente
+              ? "Este acesso está vinculado aos registros compartilhados pelo cuidador."
+              : "Quando o cuidador compartilhar um paciente, os registros aparecerão automaticamente nesta área."}
+          </p>
         </div>
       </div>
     </section>
