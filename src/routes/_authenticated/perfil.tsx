@@ -61,15 +61,21 @@ function Perfil() {
   const paciente = pacientes.find((p) => p.id === pacienteId);
   const souDono = !!paciente && !!usuarioId && paciente.owner_id === usuarioId;
 
-  const { data: codigo } = useQuery({
+  const {
+    data: codigo,
+    error: erroCodigo,
+    isPending: carregandoCodigo,
+  } = useQuery({
     queryKey: ["codigo-convite", pacienteId],
     enabled: !!pacienteId && souDono,
+    retry: false,
     queryFn: async () => {
       const { data, error } = await supabase.rpc("gerar_codigo_convite", {
         _patient_id: pacienteId!,
       });
       if (error) throw error;
-      return data as string;
+      if (!data) throw new Error("A função não retornou um código.");
+      return String(data);
     },
   });
 
@@ -191,7 +197,7 @@ function Perfil() {
               Compartilhe o código com familiares autorizados a acompanhar os registros de {paciente.nome}.
             </p>
             <p className="mt-4 rounded-lg bg-chrome-tint py-4 text-center font-display text-3xl font-bold tracking-[0.22em] text-primary ring-1 ring-border sm:text-4xl">
-              {codigo ?? "······"}
+              {carregandoCodigo ? "Gerando…" : codigo ?? "Não foi possível gerar"}
             </p>
             <div className="mt-3 grid grid-cols-2 gap-3">
               <Button onClick={() => codigo && copiar(codigo)} variant="secondary">
@@ -201,9 +207,15 @@ function Perfil() {
                 <Share2 className="size-5" />Enviar
               </Button>
             </div>
-            <p className="mt-3 text-base font-semibold text-inksoft">
-              O código fica vinculado a {paciente.nome} e pode ser validado pela família na tela de convidado.
-            </p>
+            {erroCodigo ? (
+              <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm font-semibold text-red-700">
+                Não foi possível gerar o código: {erroCodigo.message}
+              </p>
+            ) : (
+              <p className="mt-3 text-base font-semibold text-inksoft">
+                O código fica vinculado a {paciente.nome} e pode ser validado pela família na tela de convidado.
+              </p>
+            )}
           </section>
         ) : null}
 
