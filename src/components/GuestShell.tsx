@@ -14,6 +14,8 @@ export function GuestShell({ children }: Props) {
   async function sair() {
     await supabase.auth.signOut();
     localStorage.removeItem("aicare_codigo_convite");
+    localStorage.removeItem("aicare_paciente_convidado");
+    localStorage.removeItem("aicare_nome_paciente_convidado");
     localStorage.removeItem("aicare_foto_hoje");
     navigate({ to: "/" });
   }
