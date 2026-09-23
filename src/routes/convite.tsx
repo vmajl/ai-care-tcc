@@ -5,16 +5,27 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/convite")({ component: ConvitePage });
 
+const CODIGO_CONVITE_PADRAO = "AICARE2026";
+
 function ConvitePage() {
   const navigate = useNavigate();
-  const [codigo, setCodigo] = useState("");
+  const [codigo, setCodigo] = useState(CODIGO_CONVITE_PADRAO);
 
   function continuar() {
     const normalizado = codigo.trim().toUpperCase();
-    if (!normalizado) { toast.error("Digite o código de convite."); return; }
+
+    if (normalizado !== CODIGO_CONVITE_PADRAO) {
+      toast.error("Código de convite inválido.");
+      return;
+    }
+
     localStorage.setItem("aicare_codigo_convite", normalizado);
     navigate({ to: "/auth" });
-    window.history.replaceState(null, "", `/auth?modo=convidado&codigo=${encodeURIComponent(normalizado)}`);
+    window.history.replaceState(
+      null,
+      "",
+      `/auth?modo=convidado&codigo=${encodeURIComponent(normalizado)}`,
+    );
     window.dispatchEvent(new PopStateEvent("popstate"));
   }
 
