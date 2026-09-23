@@ -84,7 +84,7 @@ function Remedios() {
         throw new Error("ESTOQUE_INVALIDO");
       }
 
-      const { data: atualizado, error } = await supabase
+      const { error } = await supabase
         .from("medications")
         .update({
           nome: nome.trim(),
@@ -96,12 +96,10 @@ function Remedios() {
           unidade_estoque: unidadeEstoque.trim() || "unidade",
         })
         .eq("id", editando.id)
-        .eq("owner_id", sessao.user.id)
-        .select("id, quantidade_estoque, unidade_estoque")
-        .single();
+        .eq("owner_id", sessao.user.id);
 
-      if (error || !atualizado) {
-        throw error ?? new Error("ATUALIZACAO_NAO_CONFIRMADA");
+      if (error) {
+        throw error;
       }
     },
     onSuccess: () => {
@@ -113,7 +111,7 @@ function Remedios() {
     onError: (error) => toast.error(
       error.message === "ESTOQUE_INVALIDO"
         ? "Informe uma quantidade de estoque válida."
-        : "Não conseguimos atualizar o remédio. Verifique se o estoque foi salvo no banco de dados."
+        : `Não conseguimos atualizar: ${error.message || "erro desconhecido"}`
     ),
   });
 
