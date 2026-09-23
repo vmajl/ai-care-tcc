@@ -42,10 +42,7 @@ export const conversarComAssistente = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<RespostaAssistente> => {
     const apiKey = process.env["LOVABLE_API_KEY"];
     if (!apiKey) {
-      return {
-        resposta: "A assistente está indisponível agora. Tente novamente em alguns instantes.",
-        sugestao: null,
-      };
+      return respostaLocal(data.mensagens);
     }
 
     const hoje = new Date().toISOString().slice(0, 10);
@@ -182,3 +179,65 @@ export const conversarComAssistente = createServerFn({ method: "POST" })
       sugestao,
     };
   });
+
+
+function respostaLocal(mensagens: Array<{ role: "user" | "assistant"; content: string }>): RespostaAssistente {
+  const texto = mensagens
+    .filter((mensagem) => mensagem.role === "user")
+    .map((mensagem) => mensagem.content)
+    .join(" ");
+
+  const ultimo = mensagens[mensagens.length - 1]?.content ?? "";
+  const nomeMatch = texto.match(/(?:^|[,.;])\s*([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9 -]{1,60}?)(?=,|\s+\d+(?:[.,]\d+)?\s*(?:mg|mcg|g|ml|mL|%|ui|UI)|\s+de\s+\d+\s*(?:em\s+\d+)?\s*h)/i);
+  const dosagemMatch = texto.match(/\b(\d+(?:[.,]\d+)?)\s*(mg|mcg|g|ml|mL|%|ui|UI)\b/i);
+  const intervaloMatch = texto.match(/(?:de\s*)?(\d{1,2})\s*(?:em\s*\s*\d{1,2}\s*)?h(?:oras)?/i);
+  const horarioMatch = texto.match(/(?:primeira dose|primeiro horário|horário)\D{0,20}(\d{1,2})(?::|h)?(\d{2})?/i);
+  const estoqueMatch = texto.match(/(?:tenho|possuo|estoque|em posse|restam?|restante)\D{0,15}(\d+(?:[.,]\d+)?)\s*(comprimidos?|cápsulas?|capsulas?|frascos?|ml|mL|gotas?|doses?|ampolas?|unidades?)/i);
+
+  const nome = nomeMatch?.[1]?.trim() || "";
+  const dosagem = dosagemMatch ? `${dosagemMatch[1]} ${dosagemMatch[2]}` : "";
+  const intervalo_horas = intervaloMatch ? Number(intervaloMatch[1]) : 0;
+  const primeiro_horario = horarioMatch
+    ? `${horarioMatch[1].padStart(2, "0")}:${(horarioMatch[2] ?? "00").padStart(2, "0")}`
+    : "";
+  const quantidade_estoque = estoqueMatch ? Number(estoqueMatch[1].replace(",", ".")) : 0;
+  const unidade_estoque = estoqueMatch?.[2] ?? "";
+
+  if (!nome || !dosagem || !intervalo_horas) {
+    return {
+      resposta: "Me passe o nome do remédio, a dosagem e de quantas em quantas horas ele deve ser tomado.",
+      sugestao: null,
+    };
+  }
+
+  if (!primeiro_horario) {
+    return {
+      resposta: `Entendi: ${nome}, ${dosagem}, a cada ${intervalo_horas} horas. Qual é o horário da primeira dose do dia?`,
+      sugestao: null,
+    };
+  }
+
+  if (!estoqueMatch) {
+    return {
+      resposta: "Certo. Agora me diga quanto você tem desse medicamento em estoque e a unidade. Ex.: 30 comprimidos, 2 frascos ou 60 mL.",
+      sugestao: null,
+    };
+  }
+
+  const sugestao: Sugestao = {
+    nome,
+    dosagem,
+    intervalo_horas: Math.min(72, Math.max(1, intervalo_horas)),
+    primeiro_horario,
+    continuo: true,
+    data_fim: null,
+    instrucoes: null,
+    quantidade_estoque: Math.max(0, quantidade_estoque),
+    unidade_estoque: unidade_estoque.slice(0, 40),
+  };
+
+  return {
+    resposta: `Anotei ${nome}. Confira os dados abaixo e confirme para cadastrar.`,
+    sugestao,
+  };
+}
