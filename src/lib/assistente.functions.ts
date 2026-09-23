@@ -138,6 +138,15 @@ export const conversarComAssistente = createServerFn({ method: "POST" })
 
     const message = json.choices?.[0]?.message;
     let sugestao: Sugestao | null = null;
+
+    // Se o cuidador acabou de informar o estoque diretamente (ex.: "60 comprimidos"),
+    // não deixe o modelo voltar a perguntar a mesma coisa. O dado já está na conversa.
+    const ultimaMensagemUsuario =
+      [...data.mensagens].reverse().find((mensagem) => mensagem.role === "user")?.content ?? "";
+    const estoqueInformadoDiretamente =
+      /^\s*\d+(?:[.,]\d+)?\s*(comprimidos?|cápsulas?|capsulas?|frascos?|ml|mL|gotas?|doses?|ampolas?|unidades?)\s*[.!]?\s*$/i.test(
+        ultimaMensagemUsuario,
+      );
     const chamada = message?.tool_calls?.find((t) => t.function?.name === "registrar_medicamento");
     if (chamada?.function?.arguments) {
       try {
@@ -167,6 +176,13 @@ export const conversarComAssistente = createServerFn({ method: "POST" })
         if (sugestao.continuo) sugestao.data_fim = null;
       } catch (erro) {
         console.error("Não foi possível ler a ficha sugerida", erro);
+      }
+    }
+
+    if (!sugestao && estoqueInformadoDiretamente) {
+      const respostaLocal = respostaLocal(data.mensagens);
+      if (respostaLocal.sugestao) {
+        return respostaLocal;
       }
     }
 
