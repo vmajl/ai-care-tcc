@@ -4,13 +4,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/*
- * AICare — design system
- * Estética clínica e acolhedora: azul-petróleo, azul suave e superfícies claras,
- * tipografia grande e arredondada para leitura fácil por pessoas idosas.
- * Todas as cores em oklch e registradas como tokens semânticos.
- */
-
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -19,11 +12,9 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
-
   --font-display: var(--font-family-display);
   --font-body: var(--font-family-body);
   --font-sans: var(--font-family-body);
-
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-canvas: var(--canvas);
@@ -36,16 +27,15 @@
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
+  --color-muted-foreground: var(--inksoft);
   --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-foreground: var(--mintink);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
-
   --color-chrome-a: var(--chrome-a);
   --color-chrome-b: var(--chrome-b);
   --color-chrome-deep: var(--chrome-deep);
@@ -67,11 +57,9 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.5rem;
   --font-family-display: "Fredoka", "Quicksand", ui-rounded, sans-serif;
   --font-family-body: "Quicksand", ui-rounded, sans-serif;
-
-  /* Identidade AICare: azul-petróleo/teal, distinta de apps de mensagens. */
   --chrome-a: #7DC8DF;
   --chrome-b: #65B5D0;
   --chrome-deep: #4FA7C2;
@@ -86,13 +74,11 @@
   --coralink: oklch(0.4829 0.1198 32.87);
   --amber: oklch(0.9661 0.04 88.2);
   --amberink: oklch(0.5425 0.0989 84.61);
-  /* Verde reservado para estados de sucesso, não para a marca. */
   --success: oklch(0.48 0.13 145);
   --success-tint: oklch(0.96 0.045 145);
   --warning: oklch(0.52 0.11 75);
   --warning-tint: oklch(0.96 0.05 85);
   --overlay: oklch(0.18 0.025 210 / 45%);
-
   --background: var(--canvas);
   --foreground: var(--ink);
   --card: oklch(1 0 0);
@@ -104,7 +90,6 @@
   --secondary: var(--chrome-tint);
   --secondary-foreground: var(--ink);
   --muted: var(--chrome-tint);
-  --muted-foreground: var(--inksoft);
   --accent: var(--mint);
   --accent-foreground: var(--mintink);
   --destructive: oklch(0.577 0.245 27.325);
@@ -112,56 +97,25 @@
   --border: oklch(0.28 0.035 215 / 14%);
   --input: oklch(0.28 0.035 215 / 20%);
   --ring: var(--chrome-deep);
-
-  --gradient-chrome: linear-gradient(135deg, var(--chrome-a), var(--chrome-b));
-  --gradient-chrome-deep: linear-gradient(
-    135deg,
-    oklch(0.57 0.10 192),
-    oklch(0.52 0.11 210)
-  );
   --shadow-soft: 0 4px 14px -8px oklch(0.25 0.03 210 / 16%);
 }
 
-@utility chrome {
-  background-image: var(--gradient-chrome);
-}
-
-@utility chrome-deep {
-  background-image: var(--gradient-chrome-deep);
-}
-
-@utility shadow-soft {
-  box-shadow: var(--shadow-soft);
-}
+@utility shadow-soft { box-shadow: var(--shadow-soft); }
 
 @keyframes pop {
-  0% {
-    transform: scale(0.2);
-    opacity: 0;
-  }
-  60% {
-    transform: scale(1.25);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+  0% { transform: scale(0.2); opacity: 0; }
+  60% { transform: scale(1.25); }
+  100% { transform: scale(1); opacity: 1; }
 }
-
-@utility anim-check {
-  animation: pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
-}
+@utility anim-check { animation: pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
 
 @layer base {
-  * {
-    border-color: var(--color-border);
-  }
-
+  * { border-color: var(--color-border); }
   body {
     background-color: var(--color-canvas);
     color: var(--color-foreground);
     font-family: var(--font-family-body);
-    font-size: 1.125rem;
+    font-size: 1.0625rem;
     -webkit-font-smoothing: antialiased;
   }
 }
@@ -172,21 +126,18 @@
   line-height: 1.15;
   font-weight: 600;
 }
-
 @utility section-heading {
   font-family: var(--font-family-display);
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   line-height: 1.25;
   font-weight: 600;
 }
-
 @utility surface {
   border-radius: var(--radius-lg);
   background-color: var(--color-card);
-  padding: 1.25rem;
+  padding: 1.125rem;
   box-shadow: inset 0 0 0 1px var(--color-border);
 }
-
 @utility field-control {
   min-height: 3.25rem;
   width: 100%;
@@ -198,12 +149,6 @@
   outline: none;
   &:focus-visible { box-shadow: inset 0 0 0 2px var(--color-ring); }
 }
-
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
