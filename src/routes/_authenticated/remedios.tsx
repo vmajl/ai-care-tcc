@@ -31,6 +31,8 @@ function Remedios() {
   const [horario, setHorario] = useState("08:00");
   const [intervalo, setIntervalo] = useState("24");
   const [instrucoes, setInstrucoes] = useState("");
+  const [quantidadeEstoque, setQuantidadeEstoque] = useState("0");
+  const [unidadeEstoque, setUnidadeEstoque] = useState("unidade");
 
   const { data: pacientes = [] } = useQuery({
     queryKey: ["pacientes", "cuidador"],
@@ -80,6 +82,8 @@ function Remedios() {
         primeiro_horario: horario,
         intervalo_horas: Number(intervalo),
         instrucoes: instrucoes.trim() || null,
+        quantidade_estoque: Math.max(0, Number(quantidadeEstoque.replace(",", ".")) || 0),
+        unidade_estoque: unidadeEstoque.trim() || "unidade",
       }).eq("id", editando.id);
       if (error) throw error;
     },
@@ -99,6 +103,8 @@ function Remedios() {
     setHorario(med.primeiro_horario?.slice(0, 5) || "08:00");
     setIntervalo(String(med.intervalo_horas || 24));
     setInstrucoes(med.instrucoes || "");
+    setQuantidadeEstoque(String(med.quantidade_estoque ?? 0));
+    setUnidadeEstoque(med.unidade_estoque || "unidade");
   }
 
   const ativos = medicamentos.filter((m) => m.ativo);
@@ -134,6 +140,11 @@ function Remedios() {
                     <p className="mt-1 text-base font-semibold text-primary">{med.dosagem}</p>
                     <p className="mt-1 text-sm text-inksoft">{descricaoFrequencia(med)}</p>
                     <p className="mt-1 text-sm text-inksoft">Primeira dose às {med.primeiro_horario?.slice(0, 5)}</p>
+                    <p className="mt-2 inline-flex items-baseline gap-1 rounded-md bg-chrome-tint px-2.5 py-1 text-sm font-semibold text-primary">
+                      <span>Estoque:</span>
+                      <span className="font-display text-base">{Number(med.quantidade_estoque ?? 0).toLocaleString("pt-BR")}</span>
+                      <span>{med.unidade_estoque || "unidade"}</span>
+                    </p>
                     {med.instrucoes ? <p className="mt-2 border-l-2 border-primary pl-3 text-base font-semibold text-inksoft">{med.instrucoes}</p> : null}
                   </div>
                   <div className="flex shrink-0 gap-1">
@@ -172,6 +183,10 @@ function Remedios() {
                   <Campo label="Intervalo (horas)" value={intervalo} onChange={setIntervalo} type="number" />
                 </div>
                 <Campo label="Instruções" value={instrucoes} onChange={setInstrucoes} />
+                <div className="grid grid-cols-2 gap-3">
+                  <Campo label="Quantidade em estoque" value={quantidadeEstoque} onChange={setQuantidadeEstoque} type="number" />
+                  <Campo label="Unidade" value={unidadeEstoque} onChange={setUnidadeEstoque} />
+                </div>
               </div>
               <Button onClick={() => atualizar.mutate()} disabled={atualizar.isPending || !nome.trim() || !dosagem.trim()} className="mt-4 w-full">
                 {atualizar.isPending ? "Salvando…" : "Salvar alterações"}
