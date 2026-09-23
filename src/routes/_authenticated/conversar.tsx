@@ -152,6 +152,8 @@ function Conversar() {
         continuo: sugestao.continuo,
         data_fim: sugestao.data_fim,
         instrucoes: sugestao.instrucoes,
+        quantidade_estoque: sugestao.quantidade_estoque,
+        unidade_estoque: sugestao.unidade_estoque,
       });
 
       if (error) throw error;
@@ -362,6 +364,11 @@ function Conversar() {
               <Linha
                 rotulo="Primeira dose"
                 valor={sugestao.primeiro_horario}
+              />
+
+              <Linha
+                rotulo="Estoque inicial"
+                valor={`${sugestao.quantidade_estoque} ${sugestao.unidade_estoque}`}
               />
 
               <Linha
