@@ -204,7 +204,7 @@ function Remedios() {
                 <Campo label="Instruções" value={instrucoes} onChange={setInstrucoes} />
                 <div className="grid grid-cols-2 gap-3">
                   <Campo label="Quantidade em estoque" value={quantidadeEstoque} onChange={setQuantidadeEstoque} type="number" />
-                  <Campo label="Unidade" value={unidadeEstoque} onChange={setUnidadeEstoque} />
+                  <SelectUnidade value={unidadeEstoque} onChange={setUnidadeEstoque} />
                 </div>
               </div>
               <Button onClick={() => atualizar.mutate()} disabled={atualizar.isPending || !nome.trim() || !dosagem.trim()} className="mt-4 w-full">
@@ -220,4 +220,17 @@ function Remedios() {
 
 function Campo({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (value: string) => void; type?: string }) {
   return <label className="block"><span className="mb-1 block text-sm font-bold text-inksoft">{label}</span><input type={type} value={value} onChange={(e) => onChange(e.target.value)} className="field-control text-lg font-semibold" /></label>;
+}
+
+function SelectUnidade({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const unidades = ["comprimidos", "cápsulas", "gotas", "ampolas", "sachês", "unidades", "caixas"];
+  return (
+    <label className="block">
+      <span className="mb-1 block text-sm font-bold text-inksoft">Unidade</span>
+      <select value={value} onChange={(e) => onChange(e.target.value)} className="field-control text-lg font-semibold">
+        {!unidades.includes(value) && value ? <option value={value}>{value}</option> : null}
+        {unidades.map((unidade) => <option key={unidade} value={unidade}>{unidade}</option>)}
+      </select>
+    </label>
+  );
 }
