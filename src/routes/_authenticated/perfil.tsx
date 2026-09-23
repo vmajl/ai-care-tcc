@@ -5,6 +5,7 @@ import { Bell, Copy, LogOut, Plus, Share2, UserRound, Users } from "lucide-react
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
+import { Button } from "@/components/ui/button";
 import { usePacienteSelecionado } from "@/hooks/usePaciente";
 import { pedirPermissaoNotificacoes } from "@/hooks/useLembretes";
 import { iniciais, type Patient } from "@/lib/capsula";
@@ -24,6 +25,8 @@ export const Route = createFileRoute("/_authenticated/perfil")({
         content:
           "Cadastre as pessoas cuidadas, compartilhe o código de convite com a família e ative os avisos dos horários.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Perfil,
@@ -143,7 +146,7 @@ function Perfil() {
   return (
     <AppShell pacientes={pacientes} pacienteId={pacienteId} onTrocarPaciente={selecionar}>
       <section className="space-y-4">
-        <h1 className="font-display text-3xl font-semibold">Pessoas</h1>
+        <div><p className="text-sm font-bold text-inksoft">Acompanhamento AICare</p><h1 className="page-heading">Pessoas</h1><p className="mt-1 text-base text-inksoft">Selecione quem está recebendo os cuidados.</p></div>
 
         <ul className="space-y-3">
           {pacientes.map((p) => (
@@ -152,11 +155,11 @@ function Perfil() {
                 onClick={() => selecionar(p.id)}
                 className={
                   p.id === pacienteId
-                    ? "chrome flex w-full items-center gap-4 rounded-xl p-4 text-on-chrome ring-1 ring-on-chrome/50"
-                    : "flex w-full items-center gap-4 rounded-xl bg-card p-4 ring-1 ring-border shadow-soft"
+                    ? "flex min-h-20 w-full items-center gap-4 rounded-lg bg-primary p-4 text-primary-foreground ring-1 ring-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    : "flex min-h-20 w-full items-center gap-4 rounded-lg bg-card p-4 ring-1 ring-border transition-colors hover:bg-chrome-tint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 }
               >
-                <span className="grid size-12 shrink-0 place-items-center rounded-full bg-chrome-tint">
+                <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-chrome-tint">
                   <span className="font-display text-lg font-bold text-chrome-deep">{iniciais(p.nome)}</span>
                 </span>
                 <span className="text-left">
@@ -171,24 +174,24 @@ function Perfil() {
         </ul>
 
         {paciente && souDono ? (
-          <section className="rounded-xl bg-card p-5 ring-1 ring-border shadow-soft">
+          <section className="surface">
             <h2 className="flex items-center gap-2 font-display text-xl font-semibold">
               <Users className="size-5" />
-              Convidar a família
+              Acompanhamento familiar
             </h2>
             <p className="mt-2 text-base text-inksoft">
-              Compartilhe este código com quem também quiser acompanhar os remédios de {paciente.nome}.
+              Compartilhe o código com familiares autorizados a acompanhar os registros de {paciente.nome}.
             </p>
-            <p className="chrome mt-4 rounded-xl py-4 text-center font-display text-4xl font-bold tracking-[0.3em] text-on-chrome ring-1 ring-on-chrome/50">
+            <p className="mt-4 rounded-lg bg-chrome-tint py-4 text-center font-display text-3xl font-bold tracking-[0.22em] text-primary ring-1 ring-border sm:text-4xl">
               {codigo ?? "······"}
             </p>
             <div className="mt-3 grid grid-cols-2 gap-3">
-              <button onClick={() => codigo && copiar(codigo)} className="flex items-center justify-center gap-2 rounded-xl bg-chrome-tint py-4 font-display text-lg font-bold text-chrome-deep ring-1 ring-border active:scale-95">
+              <Button onClick={() => codigo && copiar(codigo)} variant="secondary">
                 <Copy className="size-5" />Copiar
-              </button>
-              <button onClick={compartilhar} className="flex items-center justify-center gap-2 rounded-xl bg-mint py-4 font-display text-lg font-bold text-mintink ring-1 ring-mintink/20 active:scale-95">
+              </Button>
+              <Button onClick={compartilhar}>
                 <Share2 className="size-5" />Enviar
-              </button>
+              </Button>
             </div>
             <p className="mt-3 text-base font-semibold text-inksoft">
               {convidados.length === 0 ? "Ninguém entrou com este código ainda." : `${convidados.length} ${convidados.length === 1 ? "pessoa acompanha" : "pessoas acompanham"} ${paciente.nome}.`}
@@ -196,18 +199,18 @@ function Perfil() {
           </section>
         ) : null}
 
-        <form onSubmit={(e) => { e.preventDefault(); const limpo = nome.trim(); if (limpo) adicionar.mutate(limpo); }} className="rounded-xl bg-card p-5 ring-1 ring-border shadow-soft">
+        <form onSubmit={(e) => { e.preventDefault(); const limpo = nome.trim(); if (limpo) adicionar.mutate(limpo); }} className="surface">
           <label htmlFor="nova-pessoa" className="flex items-center gap-2 font-display text-lg font-semibold"><UserRound className="size-5" />Adicionar pessoa</label>
-          <input id="nova-pessoa" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex.: Dona Maria" className="mt-3 w-full rounded-xl bg-chrome-tint px-4 py-3 text-lg font-semibold text-ink ring-1 ring-input outline-none focus:ring-2 focus:ring-ring" />
-          <button type="submit" disabled={adicionar.isPending} className="chrome mt-3 flex w-full items-center justify-center gap-2 rounded-xl py-4 font-display text-xl font-bold text-on-chrome ring-1 ring-on-chrome/50 active:scale-95 disabled:opacity-70"><Plus className="size-6" />Salvar</button>
+          <input id="nova-pessoa" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex.: Dona Maria" className="field-control mt-3 text-lg font-semibold" />
+          <Button type="submit" disabled={adicionar.isPending} className="mt-3 w-full"><Plus />Salvar pessoa</Button>
         </form>
 
-        <button onClick={ativarAvisos} className="flex w-full items-center gap-3 rounded-xl bg-mint p-5 text-left ring-1 ring-mintink/20 active:scale-95">
-          <Bell className="size-7 shrink-0 text-mintink" />
-          <span><span className="block font-display text-xl font-semibold text-mintink">Ativar avisos dos horários</span><span className="block text-base font-semibold text-mintink/80">O aparelho avisa na hora de cada remédio.</span></span>
+        <button onClick={ativarAvisos} className="flex min-h-20 w-full items-center gap-3 rounded-lg bg-success-tint p-5 text-left text-success ring-1 ring-success/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <Bell className="size-7 shrink-0" />
+          <span><span className="block section-heading">Ativar avisos dos horários</span><span className="block text-base font-semibold opacity-80">O aparelho avisa no horário de cada medicamento.</span></span>
         </button>
 
-        <button onClick={sair} className="flex w-full items-center justify-center gap-2 rounded-xl bg-card py-4 font-display text-lg font-bold text-inksoft ring-1 ring-border active:scale-95"><LogOut className="size-5" />Sair da conta</button>
+        <Button onClick={sair} variant="outline" className="w-full"><LogOut />Sair da conta</Button>
       </section>
     </AppShell>
   );

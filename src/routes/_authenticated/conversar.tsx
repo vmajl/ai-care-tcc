@@ -6,6 +6,7 @@ import { Mic, RotateCcw, Send, Square } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
+import { Button } from "@/components/ui/button";
 import { usePacienteSelecionado } from "@/hooks/usePaciente";
 import {
   conversarComAssistente,
@@ -28,6 +29,8 @@ export const Route = createFileRoute("/_authenticated/conversar")({
         content:
           "Descreva o remédio em suas palavras e a assistente monta a ficha com horários.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Conversar,
@@ -281,16 +284,16 @@ function Conversar() {
       pacienteId={pacienteId}
       onTrocarPaciente={selecionar}
     >
-      <section className="rounded-xl bg-card p-5 ring-1 ring-border shadow-soft">
+      <section className="surface">
         <div className="mb-4 flex items-center gap-3">
-          <span className="chrome grid size-11 shrink-0 place-items-center rounded-full ring-1 ring-on-chrome/60">
+          <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-primary">
             <span className="font-display text-lg font-bold text-on-chrome">
               IA
             </span>
           </span>
 
           <p className="font-display text-lg font-semibold">
-            Assistente de doses
+            Assistente de medicamentos
             {paciente ? ` · ${paciente.nome.split(" ")[0]}` : ""}
           </p>
         </div>
@@ -300,7 +303,7 @@ function Conversar() {
             m.role === "assistant" ? (
               <div
                 key={i}
-                className="chrome ml-auto max-w-[88%] rounded-xl rounded-br-md px-4 py-3 text-on-chrome shadow-sm"
+                className="ml-auto max-w-[88%] rounded-lg rounded-br-sm bg-primary px-4 py-3 text-primary-foreground"
               >
                 <p className="font-semibold text-pretty">
                   {m.content}
@@ -309,7 +312,7 @@ function Conversar() {
             ) : (
               <div
                 key={i}
-                className="max-w-[88%] rounded-xl rounded-tl-md bg-chrome-tint px-4 py-3"
+                className="max-w-[88%] rounded-lg rounded-tl-sm bg-chrome-tint px-4 py-3"
               >
                 <p className="font-semibold text-pretty">
                   {m.content}
@@ -326,7 +329,7 @@ function Conversar() {
         </div>
 
         {sugestao ? (
-          <div className="mt-4 rounded-xl bg-mint p-4 ring-1 ring-mintink/20">
+          <div className="mt-4 rounded-lg bg-success-tint p-4 ring-1 ring-success/20">
             <p className="mb-3 text-xs font-bold tracking-[0.14em] text-mintink uppercase">
               Cartão de confirmação
             </p>
@@ -372,20 +375,19 @@ function Conversar() {
             </dl>
 
             <div className="mt-4 grid grid-cols-2 gap-2">
-              <button
+              <Button
                 onClick={confirmar}
                 disabled={salvando || !pacienteId}
-                className="rounded-xl bg-mintink py-3 font-display text-lg font-bold text-on-chrome ring-1 ring-mintink/30 transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-70"
               >
                 Confirmar
-              </button>
+              </Button>
 
-              <button
+              <Button
                 onClick={() => setSugestao(null)}
-                className="rounded-xl bg-card py-3 font-display text-lg font-bold text-inksoft ring-1 ring-border transition-transform hover:scale-[1.02] active:scale-95"
+                variant="outline"
               >
                 Ajustar
-              </button>
+              </Button>
             </div>
           </div>
         ) : null}
@@ -394,7 +396,7 @@ function Conversar() {
         <div className="mt-4 space-y-3">
 
           {audioUrl ? (
-            <div className="rounded-xl bg-chrome-tint p-4 ring-1 ring-input">
+            <div className="rounded-lg bg-chrome-tint p-4 ring-1 ring-input">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div>
                   <p className="font-semibold text-ink">
@@ -406,14 +408,15 @@ function Conversar() {
                   </p>
                 </div>
 
-                <button
+                <Button
                   type="button"
                   onClick={cancelarAudio}
-                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-ink ring-1 ring-input"
+                  variant="outline"
+                  size="sm"
                 >
                   <RotateCcw className="size-4" />
                   Gravar novamente
-                </button>
+                </Button>
               </div>
 
               <audio
@@ -438,37 +441,40 @@ function Conversar() {
                   ? "Gravando áudio..."
                   : "Ex.: Losartana 50 mg, de 12 em 12 horas, uso contínuo"
               }
-              className="flex-1 resize-none rounded-xl bg-chrome-tint px-4 py-3 text-lg font-semibold text-ink ring-1 ring-input outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+              className="field-control flex-1 resize-none py-3 text-lg font-semibold disabled:opacity-50"
             />
 
             {!gravando ? (
-              <button
+              <Button
                 type="button"
                 onClick={iniciarGravacao}
                 aria-label="Gravar áudio"
-                className="chrome grid size-14 shrink-0 place-items-center rounded-xl text-on-chrome ring-1 ring-on-chrome/50 active:scale-95"
+                size="icon"
+                className="size-14 shrink-0"
               >
                 <Mic className="size-6" />
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
                 type="button"
                 onClick={pararGravacao}
                 aria-label="Parar gravação"
-                className="chrome grid size-14 shrink-0 place-items-center rounded-xl text-on-chrome ring-1 ring-on-chrome/50 active:scale-95"
+                size="icon"
+                className="size-14 shrink-0"
               >
                 <Square className="size-5" />
-              </button>
+              </Button>
             )}
 
-            <button
+            <Button
               type="submit"
               disabled={pensando || gravando}
               aria-label="Enviar mensagem"
-              className="chrome grid size-14 shrink-0 place-items-center rounded-xl text-on-chrome ring-1 ring-on-chrome/50 active:scale-95 disabled:opacity-50"
+              size="icon"
+              className="size-14 shrink-0"
             >
               <Send className="size-6" />
-            </button>
+            </Button>
           </form>
 
           {gravando ? (
