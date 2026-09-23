@@ -69,7 +69,7 @@ function DiarioCalendario({ pacienteId, nomePaciente }: { pacienteId: string | n
         <Camera className="size-6 text-primary" />
       </div>
 
-      <div className="mt-4 flex items-center justify-between rounded-lg bg-card p-2 ring-1 ring-border">
+      <div className="mt-4 flex items-center justify-between rounded-lg bg-card p-1 ring-1 ring-border">
         <Button type="button" variant="ghost" size="icon" aria-label="Mês anterior"><ChevronLeft /></Button>
         <span className="font-bold">Acompanhamento diário</span>
         <Button type="button" variant="ghost" size="icon" aria-label="Próximo mês"><ChevronRight /></Button>
@@ -97,7 +97,7 @@ function DiarioCalendario({ pacienteId, nomePaciente }: { pacienteId: string | n
               ) : (
                 <div className="grid h-11 place-items-center text-base font-semibold sm:h-14">{dia}</div>
               )}
-              <span className="mt-1 block text-[10px] font-bold text-inksoft">{dia}</span>
+              {temFoto ? null : <span className="mt-1 block text-[10px] font-bold text-inksoft">{dia}</span>}
             </button>
           );
         })}
