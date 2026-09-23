@@ -15,10 +15,30 @@ export const Route = createFileRoute("/convidado")({
 });
 
 function ConvidadoHome() {
-  return <GuestShell><section className="space-y-5">
-    <div><p className="text-sm font-bold text-inksoft">Acompanhamento AICare</p><h1 className="page-heading">Área da família</h1><p className="mt-1 text-base text-inksoft">Acompanhe os registros compartilhados pelo cuidador.</p></div>
-    <section className="surface"><div className="flex items-start gap-3"><Bell className="mt-0.5 size-5 shrink-0 text-primary" /><div><p className="text-sm font-bold text-inksoft">Acompanhamento</p><p className="font-semibold">Os registros do paciente aparecerão aqui quando houver um compartilhamento ativo.</p></div></div></section>
-    <section className="surface"><div className="flex items-center gap-3"><Camera className="size-5 text-primary" /><div><h2 className="section-heading">Diário</h2><p className="mt-1 text-base text-inksoft">Fotos e registros diários compartilhados pelo cuidador serão exibidos nesta área.</p></div></div></section>
-    <section className="surface"><div className="flex items-center gap-3"><Pill className="size-5 text-primary" /><div><h2 className="section-heading">Medicamentos</h2><p className="mt-1 text-base text-inksoft">Os medicamentos do paciente compartilhado aparecerão na área de medicamentos.</p></div></div></section>
+  return <GuestShell><section className="space-y-6">
+    <div>
+      <p className="text-sm font-bold text-inksoft">Acompanhamento AICare</p>
+      <h1 className="page-heading">Área da família</h1>
+      <p className="mt-1 text-base text-inksoft">Visualize as informações compartilhadas pelo cuidador.</p>
+    </div>
+
+    <section className="surface border-l-4 border-primary">
+      <div className="flex items-start gap-3">
+        <Bell className="mt-0.5 size-5 shrink-0 text-primary" />
+        <div>
+          <p className="text-sm font-bold uppercase tracking-wide text-primary">Aguardando compartilhamento</p>
+          <h2 className="mt-1 section-heading">Nenhum paciente vinculado</h2>
+          <p className="mt-2 text-sm leading-relaxed text-inksoft">Quando o cuidador compartilhar um paciente, os registros aparecerão automaticamente nesta área.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 className="section-heading mb-3">O que você poderá acompanhar</h2>
+      <div className="divide-y divide-border rounded-lg bg-card px-4 ring-1 ring-border">
+        <div className="flex items-start gap-3 py-4"><Camera className="mt-0.5 size-5 shrink-0 text-primary" /><div><p className="font-display text-lg font-semibold">Diário</p><p className="text-sm text-inksoft">Fotos e registros compartilhados pelo cuidador.</p></div></div>
+        <div className="flex items-start gap-3 py-4"><Pill className="mt-0.5 size-5 shrink-0 text-primary" /><div><p className="font-display text-lg font-semibold">Medicamentos</p><p className="text-sm text-inksoft">Horários e tratamento do paciente.</p></div></div>
+      </div>
+    </section>
   </section></GuestShell>;
 }
