@@ -66,9 +66,9 @@ function Remedios() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["medicamentos"] });
       queryClient.invalidateQueries({ queryKey: ["doses"] });
-      toast.success("Remédio arquivado.");
+      toast.success("Medicamento excluído.");
     },
-    onError: () => toast.error("Não conseguimos arquivar o remédio."),
+    onError: () => toast.error("Não conseguimos excluir o remédio."),
   });
 
   const atualizar = useMutation({
@@ -102,7 +102,7 @@ function Remedios() {
   }
 
   const ativos = medicamentos.filter((m) => m.ativo);
-  const arquivados = medicamentos.filter((m) => !m.ativo);
+  const excluídos = medicamentos.filter((m) => !m.ativo);
 
   return (
     <AppShell pacientes={pacientes} pacienteId={pacienteId} onTrocarPaciente={selecionar}>
@@ -140,7 +140,7 @@ function Remedios() {
                     <Button onClick={() => abrirEdicao(med)} aria-label={`Editar ${med.nome}`} variant="secondary" size="icon">
                       <Pencil className="size-6" />
                     </Button>
-                    <Button onClick={() => remover.mutate(med.id)} aria-label={`Arquivar ${med.nome}`} variant="destructive" size="icon">
+                    <Button onClick={() => remover.mutate(med.id)} aria-label={`Excluir ${med.nome}`} variant="destructive" size="icon">
                       <Trash2 className="size-6" />
                     </Button>
                   </div>
@@ -150,10 +150,10 @@ function Remedios() {
           </ul>
         )}
 
-        {arquivados.length > 0 ? (
+        {excluídos.length > 0 ? (
           <details className="surface">
-            <summary className="cursor-pointer font-display text-lg font-semibold">Arquivados ({arquivados.length})</summary>
-            <ul className="mt-3 space-y-2">{arquivados.map((med) => <li key={med.id} className="text-base font-semibold text-inksoft">{med.nome} · {med.dosagem}</li>)}</ul>
+            <summary className="cursor-pointer font-display text-lg font-semibold">Excluídos ({excluídos.length})</summary>
+            <ul className="mt-3 space-y-2">{excluídos.map((med) => <li key={med.id} className="text-base font-semibold text-inksoft">{med.nome} · {med.dosagem}</li>)}</ul>
           </details>
         ) : null}
 
