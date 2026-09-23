@@ -77,7 +77,20 @@ function Hoje() {
       if (!sessao.user) throw new Error("Sessão não encontrada.");
 
       const quantidadePorDose = obterQuantidadePorDose(dose.medication.dosagem);
-      const estoqueAtual = Number(dose.medication.quantidade_estoque ?? 0);
+
+      // Sempre busca o estoque mais recente no banco. O valor da tela pode estar desatualizado.
+      const { data: medicamentoAtual, error: medicamentoError } = await supabase
+        .from("medications")
+        .select("id, owner_id, quantidade_estoque")
+        .eq("id", dose.medication.id)
+        .eq("owner_id", sessao.user.id)
+        .single();
+
+      if (medicamentoError || !medicamentoAtual) {
+        throw medicamentoError ?? new Error("MEDICAMENTO_NAO_ENCONTRADO");
+      }
+
+      const estoqueAtual = Number(medicamentoAtual.quantidade_estoque ?? 0);
 
       if (estoqueAtual < quantidadePorDose) {
         throw new Error("ESTOQUE_INSUFICIENTE");
@@ -91,14 +104,20 @@ function Hoje() {
       });
       if (logError) throw logError;
 
-      const { error: estoqueError } = await supabase
+      // Só atualiza a linha se o estoque ainda tiver o mesmo valor que acabamos de ler.
+      const novoEstoque = estoqueAtual - quantidadePorDose;
+      const { data: medicamentoAtualizado, error: estoqueError } = await supabase
         .from("medications")
-        .update({ quantidade_estoque: estoqueAtual - quantidadePorDose })
-        .eq("id", dose.medication.id);
+        .update({ quantidade_estoque: novoEstoque })
+        .eq("id", dose.medication.id)
+        .eq("owner_id", sessao.user.id)
+        .eq("quantidade_estoque", estoqueAtual)
+        .select("id, quantidade_estoque")
+        .single();
 
-      if (estoqueError) {
+      if (estoqueError || !medicamentoAtualizado) {
         await supabase.from("dose_logs").delete().eq("medication_id", dose.medication.id).eq("horario_previsto", dose.when.toISOString());
-        throw estoqueError;
+        throw estoqueError ?? new Error("ESTOQUE_ALTERADO");
       }
     },
     onSuccess: () => {
@@ -113,17 +132,34 @@ function Hoje() {
 
   const desmarcar = useMutation({
     mutationFn: async (dose: Dose) => {
+      const { data: sessao } = await supabase.auth.getUser();
+      if (!sessao.user) throw new Error("Sessão não encontrada.");
+
       const quantidadePorDose = obterQuantidadePorDose(dose.medication.dosagem);
-      const estoqueAtual = Number(dose.medication.quantidade_estoque ?? 0);
+
+      const { data: medicamentoAtual, error: medicamentoError } = await supabase
+        .from("medications")
+        .select("id, quantidade_estoque")
+        .eq("id", dose.medication.id)
+        .eq("owner_id", sessao.user.id)
+        .single();
+      if (medicamentoError || !medicamentoAtual) throw medicamentoError ?? new Error("MEDICAMENTO_NAO_ENCONTRADO");
+
+      const estoqueAtual = Number(medicamentoAtual.quantidade_estoque ?? 0);
+
       const { error } = await supabase.from("dose_logs").delete().eq("id", dose.log!.id);
       if (error) throw error;
 
-      const { error: estoqueError } = await supabase
+      const { data: medicamentoAtualizado, error: estoqueError } = await supabase
         .from("medications")
         .update({ quantidade_estoque: estoqueAtual + quantidadePorDose })
-        .eq("id", dose.medication.id);
+        .eq("id", dose.medication.id)
+        .eq("owner_id", sessao.user.id)
+        .eq("quantidade_estoque", estoqueAtual)
+        .select("id, quantidade_estoque")
+        .single();
 
-      if (estoqueError) throw estoqueError;
+      if (estoqueError || !medicamentoAtualizado) throw estoqueError ?? new Error("ESTOQUE_ALTERADO");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["doses"] });
