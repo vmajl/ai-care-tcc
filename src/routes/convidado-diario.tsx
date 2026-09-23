@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { GuestShell } from "@/components/GuestShell";
+import { Button } from "@/components/ui/button";
 import { usePacienteSelecionado } from "@/hooks/usePaciente";
 import type { Patient } from "@/lib/capsula";
 
