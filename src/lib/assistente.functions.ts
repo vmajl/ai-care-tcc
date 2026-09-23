@@ -191,7 +191,9 @@ function respostaLocal(mensagens: Array<{ role: "user" | "assistant"; content: s
   const nomeMatch = texto.match(/(?:^|[,.;])\s*([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9 -]{1,60}?)(?=,|\s+\d+(?:[.,]\d+)?\s*(?:mg|mcg|g|ml|mL|%|ui|UI)|\s+de\s+\d+\s*(?:em\s+\d+)?\s*h)/i);
   const dosagemMatch = texto.match(/\b(\d+(?:[.,]\d+)?)\s*(mg|mcg|g|ml|mL|%|ui|UI)\b/i);
   const intervaloMatch = texto.match(/(?:de\s*)?(\d{1,2})\s*(?:em\s*\s*\d{1,2}\s*)?h(?:oras)?/i);
-  const horarioMatch = texto.match(/(?:primeira dose|primeiro horário|horário)\D{0,20}(\d{1,2})(?::|h)?(\d{2})?/i);
+  const horarioMatch =
+    texto.match(/(?:primeira dose|primeiro horário|horário|às|as)\D{0,20}(\d{1,2})(?::|h)(\d{2})?/i) ||
+    ultimo.match(/\b(\d{1,2})(?::|h)(\d{2})?\b/i);
   const estoqueMatch = texto.match(/(?:tenho|possuo|estoque|em posse|restam?|restante)\D{0,15}(\d+(?:[.,]\d+)?)\s*(comprimidos?|cápsulas?|capsulas?|frascos?|ml|mL|gotas?|doses?|ampolas?|unidades?)/i);
 
   const nome = nomeMatch?.[1]?.trim() || "";
