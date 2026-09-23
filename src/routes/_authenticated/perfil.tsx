@@ -61,31 +61,6 @@ function Perfil() {
   const paciente = pacientes.find((p) => p.id === pacienteId);
   const souDono = !!paciente && !!usuarioId && paciente.owner_id === usuarioId;
 
-  const { data: convidados = [] } = useQuery({
-    queryKey: ["convidados", pacienteId],
-    enabled: !!pacienteId && souDono,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("patient_members")
-        .select("id, user_id, criado_em")
-        .eq("patient_id", pacienteId!);
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: codigo } = useQuery({
-    queryKey: ["convite", pacienteId],
-    enabled: !!pacienteId && souDono,
-    queryFn: async (): Promise<string> => {
-      const { data, error } = await supabase.rpc("gerar_codigo_convite", {
-        _patient_id: pacienteId!,
-      });
-      if (error) throw error;
-      return data as string;
-    },
-  });
-
   const adicionar = useMutation({
     mutationFn: async (novoNome: string) => {
       const { data: sessao } = await supabase.auth.getUser();
@@ -197,7 +172,7 @@ function Perfil() {
               </Button>
             </div>
             <p className="mt-3 text-base font-semibold text-inksoft">
-              {convidados.length === 0 ? "Ninguém entrou com este código ainda." : `${convidados.length} ${convidados.length === 1 ? "pessoa acompanha" : "pessoas acompanham"} ${paciente.nome}.`}
+              O código fica vinculado a {paciente.nome} e pode ser validado pela família na tela de convidado.
             </p>
           </section>
         ) : null}
