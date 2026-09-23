@@ -300,23 +300,27 @@ function Conversar() {
 
         <div className="space-y-3">
           {mensagens.map((m, i) =>
-            m.role === "assistant" ? (
+            m.role === "user" ? (
               <div
                 key={i}
-                className="ml-auto max-w-[88%] rounded-lg rounded-br-sm bg-primary px-4 py-3 text-primary-foreground"
+                className="flex justify-end"
               >
-                <p className="font-semibold text-pretty">
-                  {m.content}
-                </p>
+                <div className="max-w-[88%] rounded-lg rounded-br-sm bg-primary px-4 py-3 text-primary-foreground">
+                  <p className="font-semibold text-pretty">
+                    {m.content}
+                  </p>
+                </div>
               </div>
             ) : (
               <div
                 key={i}
-                className="max-w-[88%] rounded-lg rounded-tl-sm bg-chrome-tint px-4 py-3"
+                className="flex justify-start"
               >
-                <p className="font-semibold text-pretty">
-                  {m.content}
-                </p>
+                <div className="max-w-[88%] rounded-lg rounded-bl-sm bg-chrome-tint px-4 py-3">
+                  <p className="font-semibold text-pretty">
+                    {m.content}
+                  </p>
+                </div>
               </div>
             ),
           )}
