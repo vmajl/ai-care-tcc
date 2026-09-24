@@ -255,7 +255,7 @@ function Perfil() {
           </>
         ) : null}
 
-        {souDono ? (
+        {souDono || pacientes.length === 0 ? (
           <form onSubmit={(e) => { e.preventDefault(); const limpo = nome.trim(); if (limpo) adicionar.mutate(limpo); }} className="surface">
             <label htmlFor="nova-pessoa" className="flex items-center gap-2 font-display text-lg font-semibold"><UserRound className="size-5" />Adicionar pessoa</label>
             <input id="nova-pessoa" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex.: Dona Maria" className="field-control mt-3 text-lg font-semibold" />
