@@ -109,7 +109,6 @@ function Hoje() {
         .from("medications")
         .update({ quantidade_estoque: novoEstoque })
         .eq("id", dose.medication.id)
-        .eq("owner_id", sessao.user.id)
         .eq("quantidade_estoque", estoqueAtual)
         .select("id, quantidade_estoque")
         .single();
