@@ -226,12 +226,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      alterar_nivel_membro: { Args: { _nivel_acesso: string; _patient_id: string; _user_id: string }; Returns: undefined }
+      eh_administrador_principal: { Args: { _patient_id: string; _user_id?: string }; Returns: boolean }
+      eh_membro_paciente: { Args: { _patient_id: string; _user_id?: string }; Returns: boolean }
       entrar_com_codigo: { Args: { _code: string }; Returns: string }
-      gerar_codigo_convite: { Args: { _patient_id: string }; Returns: string }
-      pode_ver_paciente: {
-        Args: { _patient_id: string; _user_id: string }
-        Returns: boolean
-      }
+      gerar_codigo_convite: { Args: { _nivel_acesso?: string; _patient_id: string; _relacao?: string }; Returns: string }
+      listar_membros_paciente: { Args: { _patient_id: string }; Returns: { user_id: string; nome: string; relacao: string; nivel_acesso: string }[] }
+      pode_administrar_paciente: { Args: { _patient_id: string; _user_id?: string }; Returns: boolean }
+      pode_ver_paciente: { Args: { _patient_id: string; _user_id?: string }; Returns: boolean }
+      remover_membro_paciente: { Args: { _patient_id: string; _user_id: string }; Returns: undefined }
+      validar_codigo_convite: { Args: { _code: string }; Returns: { patient_id: string; patient_name: string; relacao: string; nivel_acesso: string }[] }
     }
     Enums: {
       [_ in never]: never
