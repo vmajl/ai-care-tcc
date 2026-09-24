@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { usePacienteSelecionado } from "@/hooks/usePaciente";
+import { buscarPacientesAcessiveis } from "@/hooks/usePacientesAcessiveis";
 import { useLembretes } from "@/hooks/useLembretes";
 import { descricaoFrequencia, dosesDoDia, proximaDose, type Dose, type DoseLog, type Medication, type Patient } from "@/lib/capsula";
 
@@ -30,9 +31,7 @@ function Hoje() {
   const { data: pacientes = [] } = useQuery({
     queryKey: ["pacientes", "cuidador"],
     queryFn: async (): Promise<Patient[]> => {
-      const { data: sessao } = await supabase.auth.getUser();
-      if (!sessao.user) return [];
-      const { data, error } = await supabase.from("patients").select("*").eq("owner_id", sessao.user.id).order("created_at", { ascending: true });
+      return buscarPacientesAcessiveis();
       if (error) throw error;
       return data;
     },
@@ -83,7 +82,7 @@ function Hoje() {
         .from("medications")
         .select("id, owner_id, quantidade_estoque")
         .eq("id", dose.medication.id)
-        .eq("owner_id", sessao.user.id)
+        
         .single();
 
       if (medicamentoError || !medicamentoAtual) {
