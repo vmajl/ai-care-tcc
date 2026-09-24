@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { usePacienteSelecionado } from "@/hooks/usePaciente";
+import { buscarPacientesAcessiveis } from "@/hooks/usePacientesAcessiveis";
 import type { Patient } from "@/lib/capsula";
 
 export const Route = createFileRoute("/_authenticated/diario")({
@@ -24,13 +25,7 @@ function DiarioCuidador() {
   const { data: pacientes = [] } = useQuery({
     queryKey: ["pacientes", "cuidador"],
     queryFn: async (): Promise<Patient[]> => {
-      const { data: sessao } = await supabase.auth.getUser();
-      if (!sessao.user) return [];
-      const { data, error } = await supabase
-        .from("patients")
-        .select("*")
-        .eq("owner_id", sessao.user.id)
-        .order("created_at", { ascending: true });
+      return buscarPacientesAcessiveis();
       if (error) throw error;
       return data;
     },
