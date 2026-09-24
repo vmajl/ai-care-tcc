@@ -123,6 +123,8 @@ export type Database = {
           id: string
           owner_id: string
           patient_id: string
+          relacao: string
+          nivel_acesso: string
         }
         Insert: {
           ativo?: boolean
@@ -131,6 +133,8 @@ export type Database = {
           id?: string
           owner_id: string
           patient_id: string
+          relacao?: string
+          nivel_acesso?: string
         }
         Update: {
           ativo?: boolean
@@ -139,6 +143,8 @@ export type Database = {
           id?: string
           owner_id?: string
           patient_id?: string
+          relacao?: string
+          nivel_acesso?: string
         }
         Relationships: [
           {
