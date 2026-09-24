@@ -116,7 +116,7 @@ function Perfil() {
       selecionar(novo.id);
       toast.success(`${novo.nome} adicionada.`);
     },
-    onError: () => toast.error("Não conseguimos salvar essa pessoa."),
+    onError: (error) => toast.error(`Não conseguimos salvar essa pessoa: ${error.message}`),
   });
 
   async function copiar(texto: string) {
