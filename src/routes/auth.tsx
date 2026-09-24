@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Bell, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,9 +7,14 @@ import { lovable } from "@/integrations/lovable/index";
 
 export const Route = createFileRoute("/auth")({ component: AuthPage });
 
+type AuthUser = {
+  id: string;
+  user_metadata?: Record<string, unknown>;
+};
 
 function AuthPage() {
   const navigate = useNavigate();
+  const processandoSessao = useRef(false);
   const [modo, setModo] = useState<"entrar" | "criar">("entrar");
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -19,79 +24,159 @@ function AuthPage() {
   const [modoConvidado, setModoConvidado] = useState(false);
   const [codigoConvite, setCodigoConvite] = useState("");
 
-  async function finalizarEntrada(user: { id: string; user_metadata?: Record<string, unknown> }) {
-    const codigo = localStorage.getItem("aicare_codigo_convite");
+  async function finalizarEntrada(user: AuthUser) {
+    if (processandoSessao.current) return;
+    processandoSessao.current = true;
 
-    if (codigo) {
-      const { data: patientId, error: conviteError } = await supabase.rpc("entrar_com_codigo", {
-        _code: codigo,
-      });
+    try {
+      const codigo = localStorage.getItem("aicare_codigo_convite");
 
-      if (!conviteError && patientId) {
+      if (codigo) {
+        const { data: patientId, error: conviteError } = await supabase.rpc("entrar_com_codigo", {
+          _code: codigo,
+        });
+
+        if (conviteError || !patientId) {
+          localStorage.removeItem("aicare_codigo_convite");
+          processandoSessao.current = false;
+          toast.error(conviteError?.message || "O código de convite é inválido ou expirou.");
+          return;
+        }
+
         localStorage.setItem("aicare_paciente_convidado", patientId);
+        localStorage.removeItem("aicare_codigo_convite");
 
-        const { data: membro } = await supabase
+        const { data: membro, error: membroError } = await supabase
           .from("patient_members")
           .select("nivel_acesso")
           .eq("patient_id", patientId)
           .eq("user_id", user.id)
           .maybeSingle();
 
-        if (membro?.nivel_acesso === "visualizacao") {
-          navigate({ to: "/convidado" });
-        } else {
-          navigate({ to: "/hoje" });
+        if (membroError) {
+          processandoSessao.current = false;
+          toast.error("Não conseguimos confirmar o acesso à paciente.");
+          return;
         }
+
+        navigate({ to: membro?.nivel_acesso === "visualizacao" ? "/convidado" : "/hoje" });
         return;
       }
 
-      if (conviteError) {
-        toast.error(conviteError.message);
-      }
+      navigate({
+        to: user.user_metadata?.["tipo_usuario"] === "convidado" ? "/convidado" : "/hoje",
+      });
+    } catch (erro) {
+      processandoSessao.current = false;
+      toast.error(
+        erro instanceof Error ? traduzir(erro.message) : "Não foi possível concluir o login.",
+      );
     }
-
-    navigate({
-      to: user.user_metadata?.["tipo_usuario"] === "convidado" ? "/convidado" : "/hoje",
-    });
   }
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const convidado = params.get("modo") === "convidado";
-    const codigo = params.get("codigo")?.toUpperCase() ?? "";
+    const codigo = params.get("codigo")?.trim().toUpperCase() ?? "";
+
     if (convidado) {
-      setModo("criar"); setModoConvidado(true); setCodigoConvite(codigo);
+      setModo("criar");
+      setModoConvidado(true);
+      setCodigoConvite(codigo);
       if (codigo) localStorage.setItem("aicare_codigo_convite", codigo);
     }
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) void finalizarEntrada(data.session.user);
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) void finalizarEntrada(session.user);
-    });
-    return () => sub.subscription.unsubscribe();
-  }, [navigate]);
+
+    let cancelado = false;
+
+    async function verificarSessao() {
+      const { data } = await supabase.auth.getSession();
+      if (!cancelado && data.session) {
+        await finalizarEntrada(data.session.user);
+      }
+    }
+
+    void verificarSessao();
+
+    return () => {
+      cancelado = true;
+    };
+  }, []);
 
   async function enviar(e: React.FormEvent) {
-    e.preventDefault(); setCarregando(true);
+    e.preventDefault();
+    setCarregando(true);
+
     try {
       if (modo === "criar") {
-        const { data, error } = await supabase.auth.signUp({ email, password: senha, options: { emailRedirectTo: window.location.origin, data: { nome, tipo_usuario: modoConvidado ? "convidado" : "cuidador", codigo_convite: codigoConvite } } });
+        const codigoPendente =
+          codigoConvite || localStorage.getItem("aicare_codigo_convite") || "";
+
+        if (modoConvidado && !codigoPendente) {
+          throw new Error("O código de convite não foi encontrado.");
+        }
+
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password: senha,
+          options: {
+            emailRedirectTo: modoConvidado
+              ? `${window.location.origin}/auth?modo=convidado&codigo=${encodeURIComponent(codigoPendente)}`
+              : `${window.location.origin}/auth`,
+            data: {
+              nome,
+              tipo_usuario: modoConvidado ? "convidado" : "cuidador",
+              ...(codigoPendente ? { codigo_convite: codigoPendente } : {}),
+            },
+          },
+        });
+
         if (error) throw error;
-        if (!data.session) setConfirmar(true);
+
+        if (data.session) {
+          await finalizarEntrada(data.user);
+        } else {
+          setConfirmar(true);
+        }
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password: senha,
+        });
+
         if (error) throw error;
         await finalizarEntrada(data.user);
       }
-    } catch (erro) { toast.error(erro instanceof Error ? traduzir(erro.message) : "Não foi possível continuar."); }
-    finally { setCarregando(false); }
+    } catch (erro) {
+      toast.error(erro instanceof Error ? traduzir(erro.message) : "Não foi possível continuar.");
+    } finally {
+      setCarregando(false);
+    }
   }
 
   async function entrarComGoogle() {
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (result.error) { toast.error("Não foi possível entrar com o Google."); return; }
-    if (result.redirected) return; navigate({ to: "/hoje" });
+    setCarregando(true);
+
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin + "/auth",
+      });
+
+      if (result.error) {
+        toast.error("Não foi possível entrar com o Google.");
+        return;
+      }
+
+      if (result.redirected) return;
+
+      const { data } = await supabase.auth.getSession();
+      if (data.session) await finalizarEntrada(data.session.user);
+    } catch (erro) {
+      toast.error(
+        erro instanceof Error ? traduzir(erro.message) : "Não foi possível entrar com o Google.",
+      );
+    } finally {
+      setCarregando(false);
+    }
   }
 
   return (
@@ -155,8 +240,10 @@ function AuthPage() {
             {!modoConvidado ? (
               <>
                 <button
+                  type="button"
                   onClick={entrarComGoogle}
-                  className="mt-3 w-full rounded-xl bg-card py-3 text-base font-semibold text-chrome-deep ring-1 ring-border hover:bg-chrome-tint"
+                  disabled={carregando}
+                  className="mt-3 w-full rounded-xl bg-card py-3 text-base font-semibold text-chrome-deep ring-1 ring-border hover:bg-chrome-tint disabled:opacity-60"
                 >
                   Entrar com o Google
                 </button>
@@ -167,6 +254,7 @@ function AuthPage() {
                   Entrar como convidado
                 </Link>
                 <button
+                  type="button"
                   onClick={() => setModo(modo === "entrar" ? "criar" : "entrar")}
                   className="mt-5 w-full text-center text-sm font-semibold text-inksoft underline"
                 >
@@ -181,8 +269,34 @@ function AuthPage() {
   );
 }
 
-function Campo({ label, value, onChange, type, autoComplete, required }: { label: string; value: string; onChange: (v: string) => void; type: string; autoComplete?: string; required?: boolean }) {
-  return <label className="block"><span className="mb-1 block text-base font-bold text-inksoft">{label}</span><input type={type} value={value} required={required} autoComplete={autoComplete} onChange={(e) => onChange(e.target.value)} className="w-full rounded-xl bg-card px-4 py-3 text-base font-medium text-ink ring-1 ring-input outline-none focus:ring-2 focus:ring-ring" /></label>;
+function Campo({
+  label,
+  value,
+  onChange,
+  type,
+  autoComplete,
+  required,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type: string;
+  autoComplete?: string;
+  required?: boolean;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-base font-bold text-inksoft">{label}</span>
+      <input
+        type={type}
+        value={value}
+        required={required}
+        autoComplete={autoComplete}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-xl bg-card px-4 py-3 text-base font-medium text-ink ring-1 ring-input outline-none focus:ring-2 focus:ring-ring"
+      />
+    </label>
+  );
 }
 
 function traduzir(mensagem: string) {
