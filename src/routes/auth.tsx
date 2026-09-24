@@ -7,9 +7,6 @@ import { lovable } from "@/integrations/lovable/index";
 
 export const Route = createFileRoute("/auth")({ component: AuthPage });
 
-function destinoParaUsuario(user: { user_metadata?: Record<string, unknown> }) {
-  return user.user_metadata?.["tipo_usuario"] === "convidado" ? "/convidado" : "/hoje";
-}
 
 function AuthPage() {
   const navigate = useNavigate();
@@ -22,6 +19,42 @@ function AuthPage() {
   const [modoConvidado, setModoConvidado] = useState(false);
   const [codigoConvite, setCodigoConvite] = useState("");
 
+  async function finalizarEntrada(user: { id: string; user_metadata?: Record<string, unknown> }) {
+    const codigo = localStorage.getItem("aicare_codigo_convite");
+
+    if (codigo) {
+      const { data: patientId, error: conviteError } = await supabase.rpc("entrar_com_codigo", {
+        _code: codigo,
+      });
+
+      if (!conviteError && patientId) {
+        localStorage.setItem("aicare_paciente_convidado", patientId);
+
+        const { data: membro } = await supabase
+          .from("patient_members")
+          .select("nivel_acesso")
+          .eq("patient_id", patientId)
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (membro?.nivel_acesso === "visualizacao") {
+          navigate({ to: "/convidado" });
+        } else {
+          navigate({ to: "/hoje" });
+        }
+        return;
+      }
+
+      if (conviteError) {
+        toast.error(conviteError.message);
+      }
+    }
+
+    navigate({
+      to: user.user_metadata?.["tipo_usuario"] === "convidado" ? "/convidado" : "/hoje",
+    });
+  }
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const convidado = params.get("modo") === "convidado";
@@ -31,10 +64,10 @@ function AuthPage() {
       if (codigo) localStorage.setItem("aicare_codigo_convite", codigo);
     }
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: destinoParaUsuario(data.session.user) as "/hoje" | "/convidado" });
+      if (data.session) void finalizarEntrada(data.session.user);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) navigate({ to: destinoParaUsuario(session.user) as "/hoje" | "/convidado" });
+      if (event === "SIGNED_IN" && session) void finalizarEntrada(session.user);
     });
     return () => sub.subscription.unsubscribe();
   }, [navigate]);
@@ -49,7 +82,7 @@ function AuthPage() {
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
         if (error) throw error;
-        navigate({ to: destinoParaUsuario(data.user) as "/hoje" | "/convidado" });
+        await finalizarEntrada(data.user);
       }
     } catch (erro) { toast.error(erro instanceof Error ? traduzir(erro.message) : "Não foi possível continuar."); }
     finally { setCarregando(false); }
