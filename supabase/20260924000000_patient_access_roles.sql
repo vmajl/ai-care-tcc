@@ -50,7 +50,8 @@ BEGIN
  RETURN v_code;
 END; $$;
 
-CREATE OR REPLACE FUNCTION public.validar_codigo_convite(_code TEXT) RETURNS TABLE(patient_id UUID,patient_name TEXT,relacao TEXT,nivel_acesso TEXT) LANGUAGE sql SECURITY DEFINER SET search_path=public AS $$ SELECT p.id,p.nome,i.relacao,i.nivel_acesso FROM public.patient_invites i JOIN public.patients p ON p.id=i.patient_id WHERE upper(trim(i.code))=upper(trim(_code)) AND i.ativo=true AND(i.expira_em IS NULL OR i.expira_em>now()) LIMIT 1; $$;
+DROP FUNCTION IF EXISTS public.validar_codigo_convite(TEXT);
+CREATE FUNCTION public.validar_codigo_convite(_code TEXT) RETURNS TABLE(patient_id UUID,patient_name TEXT,relacao TEXT,nivel_acesso TEXT) LANGUAGE sql SECURITY DEFINER SET search_path=public AS $ SELECT p.id,p.nome,i.relacao,i.nivel_acesso FROM public.patient_invites i JOIN public.patients p ON p.id=i.patient_id WHERE upper(trim(i.code))=upper(trim(_code)) AND i.ativo=true AND(i.expira_em IS NULL OR i.expira_em>now()) LIMIT 1; $;
 
 CREATE OR REPLACE FUNCTION public.entrar_com_codigo(_code TEXT) RETURNS UUID LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$
 DECLARE v_invite public.patient_invites%ROWTYPE; v_existing TEXT; v_rank_existing INT; v_rank_new INT;
