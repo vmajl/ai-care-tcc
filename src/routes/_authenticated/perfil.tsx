@@ -24,6 +24,8 @@ function Perfil() {
   const queryClient = useQueryClient();
   const [nome, setNome] = useState("");
   const [confirmandoExclusao, setConfirmandoExclusao] = useState<Patient | null>(null);
+  const [tipoConvite, setTipoConvite] = useState<"familiar-visualizacao" | "familiar-administrador" | "cuidador-administrador" | "">("");
+  const [codigoConvite, setCodigoConvite] = useState<string | null>(null);
 
   const { data: usuarioId } = useQuery({
     queryKey: ["usuario-id"],
@@ -67,42 +69,33 @@ function Perfil() {
     },
   });
 
-  const codigoFamiliar = useQuery({
-    queryKey: ["codigo-convite", pacienteId, "familiar"],
-    enabled: !!pacienteId && souAdmin,
-    queryFn: async () => {
+  const opcoesConvite = {
+    "familiar-visualizacao": { relacao: "familiar", nivel: "visualizacao", titulo: "Familiar — somente visualização", descricao: "acompanhar somente os registros" },
+    "familiar-administrador": { relacao: "familiar", nivel: "administrador", titulo: "Familiar — administrador", descricao: "administrar a rotina de cuidados" },
+    "cuidador-administrador": { relacao: "cuidador", nivel: "administrador", titulo: "Cuidador — administrador", descricao: "administrar a rotina de cuidados" },
+  } as const;
+
+  const gerarConvite = useMutation({
+    mutationFn: async (tipo: keyof typeof opcoesConvite) => {
+      const opcao = opcoesConvite[tipo];
       const { data, error } = await supabase.rpc("gerar_codigo_convite", {
-        _patient_id: pacienteId!, _relacao: "familiar", _nivel_acesso: "visualizacao",
+        _patient_id: pacienteId!,
+        _relacao: opcao.relacao,
+        _nivel_acesso: opcao.nivel,
       });
       if (error) throw error;
+      if (!data) throw new Error("O banco não retornou um código.");
       return String(data);
     },
-  });
-
-  const codigoFamiliarAdmin = useQuery({
-    queryKey: ["codigo-convite", pacienteId, "familiar-admin"],
-    enabled: !!pacienteId && souAdmin,
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc("gerar_codigo_convite", {
-        _patient_id: pacienteId!, _relacao: "familiar", _nivel_acesso: "administrador",
-      });
-      if (error) throw error;
-      return String(data);
+    onSuccess: (codigo) => {
+      setCodigoConvite(codigo);
+      toast.success("Código de convite gerado.");
+    },
+    onError: (error) => {
+      setCodigoConvite(null);
+      toast.error(`Não conseguimos gerar o código: ${error.message}`);
     },
   });
-
-  const codigoCuidador = useQuery({
-    queryKey: ["codigo-convite", pacienteId, "cuidador"],
-    enabled: !!pacienteId && souAdmin,
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc("gerar_codigo_convite", {
-        _patient_id: pacienteId!, _relacao: "cuidador", _nivel_acesso: "administrador",
-      });
-      if (error) throw error;
-      return String(data);
-    },
-  });
-
   const adicionar = useMutation({
     mutationFn: async (novoNome: string) => {
       const { data: sessao } = await supabase.auth.getUser();
@@ -228,10 +221,40 @@ function Perfil() {
           <>
             <section className="surface">
               <h2 className="flex items-center gap-2 font-display text-xl font-semibold"><Users className="size-5" />Convidar pessoas</h2>
-              <p className="mt-2 text-base text-inksoft">Cada código já define a permissão da pessoa que entrar com ele.</p>
-              <Convite titulo="Familiar — somente visualização" codigo={codigoFamiliar.data} carregando={codigoFamiliar.isPending} onCopy={copiar} onShare={() => codigoFamiliar.data && compartilhar(codigoFamiliar.data, "acompanhar somente os registros")} />
-              <Convite titulo="Familiar — administrador" codigo={codigoFamiliarAdmin.data} carregando={codigoFamiliarAdmin.isPending} onCopy={copiar} onShare={() => codigoFamiliarAdmin.data && compartilhar(codigoFamiliarAdmin.data, "administrar a rotina de cuidados")} />
-              <Convite titulo="Cuidador — administrador" codigo={codigoCuidador.data} carregando={codigoCuidador.isPending} onCopy={copiar} onShare={() => codigoCuidador.data && compartilhar(codigoCuidador.data, "administrar a rotina de cuidados")} />
+              <p className="mt-2 text-base text-inksoft">Escolha o tipo de acesso e o código será gerado automaticamente.</p>
+              <label htmlFor="tipo-convite" className="mt-4 block text-sm font-bold text-inksoft">Tipo de acesso</label>
+              <select
+                id="tipo-convite"
+                value={tipoConvite}
+                onChange={(e) => {
+                  const valor = e.target.value as typeof tipoConvite;
+                  if (!valor) { setTipoConvite(""); setCodigoConvite(null); return; }
+                  setTipoConvite(valor);
+                  setCodigoConvite(null);
+                  gerarConvite.mutate(valor);
+                }}
+                className="field-control mt-1 text-base font-semibold"
+                disabled={gerarConvite.isPending}
+              >
+                <option value="">Selecione o acesso que deseja conceder</option>
+                <option value="familiar-visualizacao">Familiar — somente visualização</option>
+                <option value="familiar-administrador">Familiar — administrador</option>
+                <option value="cuidador-administrador">Cuidador — administrador</option>
+              </select>
+              {tipoConvite ? (
+                <div className="mt-4 rounded-lg border border-border p-4">
+                  <p className="font-display text-base font-semibold">{opcoesConvite[tipoConvite].titulo}</p>
+                  <p className="mt-2 rounded-md bg-chrome-tint py-3 text-center font-display text-2xl font-bold tracking-[0.16em] text-primary">
+                    {gerarConvite.isPending ? "Gerando…" : codigoConvite ?? "Não foi possível gerar"}
+                  </p>
+                  {codigoConvite ? (
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <Button size="sm" variant="secondary" onClick={() => copiar(codigoConvite)}><Copy className="size-4" />Copiar</Button>
+                      <Button size="sm" onClick={() => compartilhar(codigoConvite, opcoesConvite[tipoConvite].descricao)}><Share2 className="size-4" />Enviar</Button>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
             </section>
 
             <section className="surface">
