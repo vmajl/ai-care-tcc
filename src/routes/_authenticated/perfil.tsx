@@ -106,8 +106,12 @@ function Perfil() {
   const adicionar = useMutation({
     mutationFn: async (novoNome: string) => {
       const { data: sessao } = await supabase.auth.getUser();
-      const { data, error } = await supabase.from("patients").insert({ owner_id: sessao.user!.id, nome: novoNome }).select().single();
+      if (!sessao.user) throw new Error("Você precisa estar logado para criar uma pessoa.");
+      const { data, error } = await supabase.rpc("criar_paciente", {
+        _nome: novoNome,
+      });
       if (error) throw error;
+      if (!data) throw new Error("O banco não retornou a pessoa criada.");
       return data;
     },
     onSuccess: (novo) => {
