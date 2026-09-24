@@ -22,6 +22,7 @@ ALTER TABLE public.patient_members DROP CONSTRAINT IF EXISTS patient_members_rel
 ALTER TABLE public.patient_members ADD CONSTRAINT patient_members_relacao_check CHECK (relacao IN ('familiar','cuidador'));
 ALTER TABLE public.patient_members DROP CONSTRAINT IF EXISTS patient_members_nivel_acesso_check;
 ALTER TABLE public.patient_members ADD CONSTRAINT patient_members_nivel_acesso_check CHECK (nivel_acesso IN ('administrador_principal','administrador','visualizacao'));
+CREATE UNIQUE INDEX IF NOT EXISTS patient_members_patient_user_unique ON public.patient_members(patient_id,user_id);
 CREATE INDEX IF NOT EXISTS patient_members_patient_idx ON public.patient_members(patient_id);
 CREATE INDEX IF NOT EXISTS patient_members_user_idx ON public.patient_members(user_id);
 
